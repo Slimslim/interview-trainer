@@ -3,3 +3,5 @@ test-results/
 reports/screenshots/
 .DS_Store
 __pycache__/
+reports/playthrough/
+reports/jobs.json
