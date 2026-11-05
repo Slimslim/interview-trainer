@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "interview-trainer/pack.schema.json",
+  "title": "Interview Trainer content",
+  "description": "pack.json (manifest) and item files (<type>.json) under packs/<slug>/",
+  "oneOf": [{ "$ref": "#/$defs/manifest" }, { "$ref": "#/$defs/itemFile" }],
+  "$defs": {
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+    "nonEmpty": { "type": "string", "minLength": 1 },
+    "manifest": {
+      "type": "object",
+      "required": ["schema", "id", "title", "version", "kind", "stages", "files"],
+      "additionalProperties": false,
+      "properties": {
+        "schema": { "const": 1 },
+        "id": { "$ref": "#/$defs/id" },
+        "title": { "$ref": "#/$defs/nonEmpty" },
+        "subtitle": { "type": "string" },
+        "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+        "kind": { "enum": ["job", "comeback"] },
+        "research": { "type": "string" },
+        "postingUrl": { "type": "string" },
+        "stages": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["id", "title", "tests", "methodology"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "$ref": "#/$defs/id" },
+              "title": { "$ref": "#/$defs/nonEmpty" },
+              "tests": { "$ref": "#/$defs/nonEmpty" },
+              "methodology": { "$ref": "#/$defs/nonEmpty" },
+              "source": { "type": "string" },
+              "mockMinutes": { "type": "integer", "minimum": 5 }
+            }
+          }
+        },
+        "files": { "type": "array", "items": { "type": "string", "pattern": "^[a-z0-9-]+\\.json$" } },
+        "reuse": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["pack", "stageMap"],
+            "additionalProperties": false,
+            "properties": {
+              "pack": { "$ref": "#/$defs/id" },
+              "types": { "type": "array", "items": { "type": "string" } },
+              "stageMap": { "type": "object", "additionalProperties": { "type": "string" } }
+            }
+          }
+        }
+      }
+    },
+    "itemFile": {
+      "type": "object",
+      "required": ["version", "items"],
+      "additionalProperties": false,
+      "properties": {
+        "version": { "type": "string" },
+        "items": { "type": "array", "items": { "$ref": "#/$defs/item" } }
+      }
+    },
+    "common": {
+      "type": "object",
+      "required": ["id", "type", "stage", "difficulty", "tags"],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "stage": { "$ref": "#/$defs/id" },
+        "difficulty": { "enum": [1, 2, 3] },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "pattern": { "type": "string" },
+        "week": { "enum": [1, 2, 3, 4] },
+        "lesson": { "type": "string" },
+        "source": { "type": "string" }
+      }
+    },
+    "codeStep": {
+      "type": "object",
+      "required": ["prompt", "tests", "hints", "solution", "lesson"],
+      "properties": {
+        "title": { "type": "string" },
+        "prompt": { "$ref": "#/$defs/nonEmpty" },
+        "starter": { "type": "string" },
+        "tests": { "$ref": "#/$defs/nonEmpty" },
+        "hints": { "type": "array", "minItems": 3, "maxItems": 3, "items": { "$ref": "#/$defs/nonEmpty" } },
+        "solution": { "$ref": "#/$defs/nonEmpty" },
+        "lesson": { "$ref": "#/$defs/nonEmpty" },
+        "alternative": { "type": "string" },
+        "ts": { "type": "string" },
+        "minutes": { "type": "number" }
+      }
+    },
+    "item": {
+      "allOf": [{ "$ref": "#/$defs/common" }],
+      "oneOf": [
+        {
+          "properties": {
+            "type": { "const": "code" },
+            "title": { "$ref": "#/$defs/nonEmpty" },
+            "prompt": { "$ref": "#/$defs/nonEmpty" },
+            "starter": { "type": "string" },
+            "tests": { "$ref": "#/$defs/nonEmpty" },
+            "hints": { "type": "array", "minItems": 3, "maxItems": 3 },
+            "solution": { "$ref": "#/$defs/nonEmpty" },
+            "lesson": { "$ref": "#/$defs/nonEmpty" },
+            "alternative": { "type": "string" },
+            "ts": { "type": "string" }
+          },
+          "required": ["type", "title", "prompt", "starter", "tests", "hints", "solution", "lesson"]
+        },
+        {
+          "properties": {
+            "type": { "const": "challenge" },
+            "title": { "$ref": "#/$defs/nonEmpty" },
+            "summary": { "$ref": "#/$defs/nonEmpty" },
+            "steps": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "$ref": "#/$defs/codeStep" } },
+            "talkPrompts": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["type", "title", "summary", "steps"]
+        },
+        {
+          "properties": {
+            "type": { "const": "bug" },
+            "title": { "$ref": "#/$defs/nonEmpty" },
+            "code": { "$ref": "#/$defs/nonEmpty" },
+            "bugLine": { "type": "integer", "minimum": 1 },
+            "fixed": { "$ref": "#/$defs/nonEmpty" },
+            "tests": { "$ref": "#/$defs/nonEmpty" },
+            "choices": { "type": "array", "minItems": 3, "maxItems": 4, "items": { "type": "string" } },
+            "answer": { "type": "integer", "minimum": 0 },
+            "explanation": { "$ref": "#/$defs/nonEmpty" }
+          },
+          "required": ["type", "title", "code", "bugLine", "fixed", "tests", "choices", "answer", "explanation"]
+        },
+        {
+          "properties": {
+            "type": { "const": "predict" },
+            "kind": { "enum": ["output", "complexity", "concept"] },
+            "code": { "type": "string" },
+            "question": { "$ref": "#/$defs/nonEmpty" },
+            "choices": { "type": "array", "minItems": 2, "maxItems": 4, "items": { "type": "string" } },
+            "answer": { "type": "integer", "minimum": 0 },
+            "explanation": { "$ref": "#/$defs/nonEmpty" },
+            "ts": { "type": "string" }
+          },
+          "required": ["type", "kind", "question", "choices", "answer", "explanation"]
+        },
+        {
+          "properties": {
+            "type": { "const": "parsons" },
+            "title": { "$ref": "#/$defs/nonEmpty" },
+            "prompt": { "$ref": "#/$defs/nonEmpty" },
+            "lines": { "type": "array", "minItems": 3, "items": { "type": "string" } },
+            "tests": { "$ref": "#/$defs/nonEmpty" },
+            "lesson": { "$ref": "#/$defs/nonEmpty" }
+          },
+          "required": ["type", "title", "prompt", "lines", "tests", "lesson"]
+        },
+        {
+          "properties": {
+            "type": { "const": "flashcard" },
+            "front": { "$ref": "#/$defs/nonEmpty" },
+            "back": { "$ref": "#/$defs/nonEmpty" },
+            "example": { "type": "string" }
+          },
+          "required": ["type", "front", "back"]
+        },
+        {
+          "properties": {
+            "type": { "const": "design" },
+            "title": { "$ref": "#/$defs/nonEmpty" },
+            "prompt": { "$ref": "#/$defs/nonEmpty" },
+            "rubric": { "$ref": "#/$defs/rubric" },
+            "outline": { "$ref": "#/$defs/nonEmpty" },
+            "minutes": { "type": "number" }
+          },
+          "required": ["type", "title", "prompt", "rubric", "outline"]
+        },
+        {
+          "properties": {
+            "type": { "const": "roleplay" },
+            "title": { "$ref": "#/$defs/nonEmpty" },
+            "persona": { "$ref": "#/$defs/nonEmpty" },
+            "brief": { "$ref": "#/$defs/nonEmpty" },
+            "opening": { "$ref": "#/$defs/nonEmpty" },
+            "hiddenFacts": { "type": "array", "minItems": 3, "items": { "type": "string" } },
+            "rubric": { "$ref": "#/$defs/rubric" }
+          },
+          "required": ["type", "title", "persona", "brief", "opening", "hiddenFacts", "rubric"]
+        },
+        {
+          "properties": {
+            "type": { "const": "behavioral" },
+            "question": { "$ref": "#/$defs/nonEmpty" },
+            "lookFor": { "type": "array", "minItems": 2, "items": { "type": "string" } },
+            "value": { "type": "string" },
+            "followUps": { "type": "array", "items": { "type": "string" } }
+          },
+          "required": ["type", "question", "lookFor"]
+        }
+      ]
+    },
+    "rubric": {
+      "type": "array", "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": ["criterion", "lookFor"],
+        "additionalProperties": false,
+        "properties": {
+          "criterion": { "$ref": "#/$defs/nonEmpty" },
+          "lookFor": { "$ref": "#/$defs/nonEmpty" },
+          "weight": { "type": "number" }
+        }
+      }
+    }
+  }
+}

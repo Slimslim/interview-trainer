@@ -1,0 +1,51 @@
+{
+ "version": "1.0.0",
+ "items": [
+  {
+   "id": "cb-w1-fstring",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "strings",
+    "f-strings"
+   ],
+   "pattern": "f-strings",
+   "title": "Greeting with an f-string",
+   "prompt": "Write `greet(name, n)` that returns `'Hi Ada, you have 3 new messages'`.",
+   "starter": "def greet(name, n):\n    pass\n",
+   "tests": "def test_basic():\n    assert greet(\"Ada\", 3) == \"Hi Ada, you have 3 new messages\"\ndef test_zero():\n    assert greet(\"Bo\", 0) == \"Hi Bo, you have 0 new messages\"\n",
+   "hints": [
+    "Python's template strings start with f before the quote.",
+    "Inside an f-string, put expressions in {curly braces}.",
+    "return f\"Hi {name}, you have ... new messages\""
+   ],
+   "solution": "def greet(name, n):\n    return f\"Hi {name}, you have {n} new messages\"\n",
+   "ts": "`Hi ${name}, you have ${n} new messages`",
+   "lesson": "f-strings are Python's template literals: f\"{expr}\". Format specs go after a colon: f\"{price:.2f}\"."
+  },
+  {
+   "id": "cb-w1-slice-rev",
+   "type": "predict",
+   "kind": "output",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "slicing"
+   ],
+   "pattern": "slicing",
+   "code": "s = \"python\"\nprint(s[::-1][:3])\n",
+   "question": "What does this print?",
+   "choices": [
+    "noh",
+    "pyt",
+    "nohtyp",
+    "hon"
+   ],
+   "answer": 0,
+   "explanation": "s[::-1] reverses to 'nohtyp'; [:3] takes the first three characters."
+  }
+ ]
+}

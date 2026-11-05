@@ -1,0 +1,15 @@
+{
+  "schema": 1,
+  "id": "comeback",
+  "title": "Comeback track",
+  "subtitle": "Rebuild hand-written Python in four weeks of 1–3 minute reps",
+  "version": "1.0.0",
+  "kind": "comeback",
+  "stages": [
+    {"id": "week1", "title": "Week 1 · Syntax & reflexes", "tests": "Core Python syntax you should type without thinking.", "methodology": "Type it, run it, read the idiomatic version. Say the TypeScript equivalent out loud."},
+    {"id": "week2", "title": "Week 2 · Stdlib & data structures", "tests": "collections, heapq, itertools, dataclasses, classes, type hints, files, json.", "methodology": "Reach for the standard library before writing it yourself; know the Big-O of each structure."},
+    {"id": "week3", "title": "Week 3 · Problem-solving patterns", "tests": "Hashing, two pointers, sliding window, stacks/queues, BFS/DFS, sort + binary search, Big-O.", "methodology": "Clarify → examples → pick a pattern → code → test → state complexity."},
+    {"id": "week4", "title": "Week 4 · Practical engineering", "tests": "Small classes with tests, asserts, tracebacks, async/await, HTTP calls, safe LLM JSON parsing.", "methodology": "Write the test first, read tracebacks bottom-up, validate every external input."}
+  ],
+  "files": ["week1.json", "week2.json", "week3.json", "week4.json"]
+}

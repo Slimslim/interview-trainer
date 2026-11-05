@@ -1,0 +1,16 @@
+{
+  "schema": 1,
+  "id": "anthropic-fde",
+  "title": "Anthropic · Forward Deployed Engineer",
+  "version": "1.0.0",
+  "kind": "job",
+  "research": "research/anthropic-fde.md",
+  "stages": [
+    {"id": "screen", "title": "Recruiter & hiring-manager screen", "tests": "TBD", "methodology": "TBD"},
+    {"id": "coding", "title": "Coding (progressive)", "tests": "TBD", "methodology": "TBD"},
+    {"id": "design", "title": "System / solution design", "tests": "TBD", "methodology": "TBD"},
+    {"id": "customer", "title": "Customer scenario", "tests": "TBD", "methodology": "TBD"},
+    {"id": "values", "title": "Behavioral & values", "tests": "TBD", "methodology": "TBD"}
+  ],
+  "files": ["challenges.json", "bugs.json", "predict.json", "parsons.json", "flashcards.json", "design.json", "roleplay.json", "behavioral.json"]
+}
