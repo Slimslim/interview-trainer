@@ -1,12 +1,12 @@
-# E2E report (2026-11-05T17:42Z, 393×659 iPhone 15 emulation)
+# E2E report (2026-11-05T18:17Z, 393×659 iPhone 15 emulation)
 
 **105/105 checks passed.**
 
 | Metric | Value |
 |---|---|
-| First load, home usable (slow 4G, 150 ms RTT, 1.6 Mbps) | 1792 ms |
-| Python ready after first load (background) | 17212 ms |
-| Returning launch (service worker) | 79 ms |
+| First load, home usable (slow 4G, 150 ms RTT, 1.6 Mbps) | 1805 ms |
+| Python ready after first load (background) | 17172 ms |
+| Returning launch (service worker) | 70 ms |
 
 ## Mobile UX (83/83)
 
@@ -21,8 +21,8 @@
 
 ## Performance (2/2)
 
-- ✅ First load (home usable) < 5 s on simulated 4G — 1792 ms
-- ✅ Returning launch < 1 s (served by service worker, 4G throttled) — 79 ms
+- ✅ First load (home usable) < 5 s on simulated 4G — 1805 ms
+- ✅ Returning launch < 1 s (served by service worker, 4G throttled) — 70 ms
 
 ## Offline (4/4)
 

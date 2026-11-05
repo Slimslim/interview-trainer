@@ -111,21 +111,38 @@ function renderItem() {
   const c = current;
   if (!c) return home();
   const item = c.items[c.idx];
-  const next = h("button.primary", { type: "button", disabled: true }, c.idx + 1 < c.items.length ? "Next →" : "Finish");
+  const nextLabel = c.idx + 1 < c.items.length ? "Next →" : "Finish";
+  const next = h("button.primary", { type: "button", disabled: true }, nextLabel);
   const skip = h("button.ghost", { type: "button" }, "Skip");
+  const advance = () => { stopSpeaking(); c.idx++; c.idx < c.items.length ? renderItem() : summary(); };
   let answered = false;
+  const award = result => {
+    const xp = progress.record(item, result);
+    c.xp += xp;
+    c.results.push({ id: item.id, ...result });
+    toast(`${result.correct ? "✓" : "✗"}  +${xp} XP`, 1400);
+  };
   const ctx = {
     quick: c.quick, mock: c.mock,
-    finish(result) {
+    advance,
+    award, // record one part (a challenge level) without ending the item
+    finish(result, { recorded = false } = {}) {
       if (answered) return;
       answered = true;
-      const xp = progress.record(item, result);
-      c.xp += xp;
-      c.results.push({ id: item.id, ...result });
+      if (!recorded) award(result);
       if (item.type === "flashcard" && result.rating === 1 && !c.requeued.has(item.id)) { c.requeued.add(item.id); c.items.push(item); }
+      ctx.setActions(null);
       next.disabled = false;
       skip.classList.add("hidden");
-      toast(`${result.correct ? "✓" : "✗"}  +${xp} XP`, 1400);
+    },
+    // Let a player put its own next step in the thumb-reachable bar.
+    setActions(a) {
+      next.textContent = a?.primary?.[0] || nextLabel;
+      next.onclick = a?.primary?.[1] || advance;
+      next.disabled = a ? false : !answered;
+      skip.textContent = a?.secondary?.[0] || "Skip";
+      skip.onclick = a?.secondary?.[1] || advance;
+      skip.classList.toggle("hidden", !a?.secondary && answered);
     },
   };
   const timer = h("span.timer");
@@ -137,8 +154,8 @@ function renderItem() {
       timer.classList.toggle("low", left < 60);
     }, 500);
   }
-  next.onclick = () => { stopSpeaking(); c.idx++; c.idx < c.items.length ? renderItem() : summary(); };
-  skip.onclick = () => { stopSpeaking(); c.idx++; c.idx < c.items.length ? renderItem() : summary(); };
+  next.onclick = advance;
+  skip.onclick = advance;
   const meta = h("div.row.wrap.small.muted", { style: { marginBottom: "6px" } },
     h("span.pill", content.TYPE_LABEL[item.type]), h("span.pill", content.stageTitle(item.pack, item.stage)),
     h("span.pill", "●".repeat(item.difficulty) + "○".repeat(3 - item.difficulty)));

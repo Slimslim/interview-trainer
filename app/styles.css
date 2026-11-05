@@ -119,7 +119,7 @@ pre {
 
 /* Code editor: plain textarea + a key bar for symbols the iOS keyboard hides */
 .editor {
-  width: 100%; min-height: 220px; font-family: var(--mono); font-size: 16px; /* 16px stops iOS zoom */
+  width: 100%; min-height: 150px; font-family: var(--mono); font-size: 16px; /* 16px stops iOS zoom */
   line-height: 1.5; padding: 12px; border-radius: 12px; border: 1px solid var(--border);
   background: var(--code-bg); color: var(--text); tab-size: 4; resize: vertical;
   white-space: pre; overflow-x: auto; overflow-wrap: normal;
@@ -183,14 +183,17 @@ audio { width: 100%; height: 44px; }
 .bubble.me { background: var(--accent); color: var(--accent-ink); align-self: flex-end; }
 
 .toast {
-  position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom) + 90px);
+  position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top) + 64px); /* top: never covers results */
   background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 12px; z-index: 50;
   max-width: calc(100% - 32px); font-size: .95rem; box-shadow: 0 6px 24px rgba(0,0,0,.25);
 }
 .list-btn { width: 100%; justify-content: space-between; text-align: left; }
 .list-btn + .list-btn { margin-top: 8px; }
 .lock { opacity: .55; }
-details > summary { min-height: 44px; display: flex; align-items: center; cursor: pointer; font-weight: 600; }
+details > summary { min-height: 44px; display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; font-size: .95rem; color: var(--accent); list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::before { content: "▸"; transition: transform .15s; }
+details[open] > summary::before { transform: rotate(90deg); }
 .center { text-align: center; }
 .huge { font-size: 2.4rem; font-weight: 750; }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }

@@ -66,7 +66,7 @@ export const MINUTES = {
 };
 export function itemMinutes(it) {
   if (it.type === "challenge") return 7;
-  if (it.type === "code" && it.week >= 3) return 3;
+  if (it.type === "code" && it.week) return it.week >= 3 ? 2.5 : 1.2; // week 1–2 reps are 1–3 lines
   return it.minutes || MINUTES[it.type] || 2;
 }
 

@@ -55,7 +55,7 @@ export async function gradeRubric({ prompt, answer, rubric, extra = "" }) {
     system: GRADER,
     messages: [{
       role: "user",
-      content: `QUESTION / SCENARIO:\n${prompt}\n\nRUBRIC:\n${rubric.map(r => `- ${r.criterion}: ${r.lookFor}`).join("\n")}\n${extra}\n\nCANDIDATE ANSWER:\n${answer || "(empty)"}`,
+      content: `QUESTION / SCENARIO:\n${prompt}\n\nRUBRIC:\n${rubric.map(r => `- ${r.criterion}${r.lookFor ? ": " + r.lookFor : ""}`).join("\n")}\n${extra}\n\nCANDIDATE ANSWER:\n${answer || "(empty)"}`,
     }],
   });
   const j = parseJSON(text);

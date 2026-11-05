@@ -55,22 +55,28 @@ export function quickSession() {
   const pool = trackPool();
   const due = new Set(dueIds());
   const dueItems = shuffle(pool.filter(i => due.has(i.id)));
-  let focus, focusLabel;
+  let focus, focusLabel, handsOn;
+  const HANDS_ON = new Set(["code", "challenge", "bug", "parsons"]);
   if (s.profile.track === "comeback") {
     const week = Math.min(4, s.comeback.week);
     focus = freshness(pool.filter(i => i.week === week && !store.get().items[i.id]?.last));
+    handsOn = focus.filter(i => HANDS_ON.has(i.type));
     focusLabel = `Week ${week}`;
   } else {
     const r = readiness(s.profile.track).sort((a, b) => a.value - b.value);
     const weak = r.find(st => pool.some(i => i.stage === st.id)) || r[0];
     focus = freshness(pool.filter(i => i.stage === weak?.id));
     focusLabel = weak?.title || "";
+    // Every job-track session includes real coding: a challenge level when there's
+    // time, otherwise a bug fix or Parsons puzzle.
+    const coding = freshness(pool.filter(i => HANDS_ON.has(i.type) && i.type !== "code"));
+    handsOn = minutes >= 8 ? [...coding.filter(i => i.type === "challenge"), ...coding] : coding.filter(i => i.type !== "challenge");
   }
   const comeback = s.profile.track === "comeback";
   const rest = freshness(pool.filter(i => !comeback || i.pack === "comeback"));
   const extras = comeback ? freshness(pool.filter(i => i.pack !== "comeback")) : [];
-  let items = fill(minutes, [{ items: dueItems, share: 0.5 }, { items: focus, share: 0.75 },
-    { items: extras, share: 0.15 }, { items: rest, share: 1 }]);
+  let items = fill(minutes, [{ items: handsOn, share: 0.7 }, { items: dueItems, share: 0.4 },
+    { items: focus, share: 0.5 }, { items: extras, share: 0.15 }, { items: rest, share: 1 }], { allowLong: minutes >= 8 });
   // A 5-minute job-track session still gets one challenge level when coding is the focus.
   if (!items.length) items = rest.slice(0, 3);
   return { kind: "quick", title: `Quick ${minutes}-min`, items: comeback ? codeFirst(items) : shuffleMild(items), focusLabel, quick: true };

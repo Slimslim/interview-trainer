@@ -1,3 +1,12 @@
+// DOM's replaceChildren/append turn null into the text "null". Our renderers
+// pass optional children (cond ? node : null) everywhere, so skip them centrally.
+for (const name of ["replaceChildren", "append"]) {
+  const orig = Element.prototype[name];
+  Element.prototype[name] = function (...nodes) {
+    return orig.apply(this, nodes.flat(Infinity).filter(n => n != null && n !== false));
+  };
+}
+
 // Tiny DOM helpers. h("button.primary", {onclick}, "Go") -> <button class="primary">
 export function h(tag, attrs, ...children) {
   const [name, ...classes] = tag.split(".");
@@ -24,6 +33,7 @@ export function h(tag, attrs, ...children) {
 
 export function mount(...nodes) {
   const app = document.getElementById("app");
+  document.querySelectorAll(".toast").forEach(t => t.remove()); // don't carry toasts across screens
   app.replaceChildren(...nodes.flat(Infinity).filter(n => n != null && n !== false));
   window.scrollTo(0, 0);
 }

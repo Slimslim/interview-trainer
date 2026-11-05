@@ -46,6 +46,7 @@ export function codeTask(task, { draftKey, startCode, onPass, onGiveUp, timerMin
   const hintBox = h("div");
   const after = h("div");
   const ed = codeEditor(code, {
+    onRun: () => run(),
     onChange: v => {
       code = v;
       const s = store.get();
@@ -179,25 +180,20 @@ export function renderChallenge(item, ctx) {
     const next = h("div");
     const onDone = res => {
       stepsDone.push(res);
+      ctx.award({ ...res, level: step + 1 });        // XP + review scheduling per level
       mem.step = res.correct ? step + 1 : step;
+      if (mem.step >= item.steps.length) mem.step = 0; // finished: next time starts fresh
       store.save();
       const last = step >= item.steps.length - 1;
-      const finishAll = () => {
-        mem.step = mem.step >= item.steps.length ? 0 : mem.step;
-        store.save();
-        const n = stepsDone.length;
-        ctx.finish({
-          correct: stepsDone.every(r => r.correct), score: stepsDone.reduce((a, r) => a + r.score, 0) / n,
-          hints: stepsDone.reduce((a, r) => a + r.hints, 0), ms: stepsDone.reduce((a, r) => a + r.ms, 0),
-          steps: n,
-        });
-      };
-      if (last || !res.correct || (ctx.quick && !ctx.mock)) {
-        next.replaceChildren(
-          !last && res.correct ? h("button.primary.block", { type: "button", onclick: () => { step++; show(); } }, `Keep going → Level ${step + 2}`) : null,
-          h("button.block", { type: "button", style: { marginTop: "8px" }, onclick: finishAll }, last ? "Finish challenge" : "Stop here (resume next time)"));
+      if (last || !res.correct) {
+        next.replaceChildren(h("div.feedback.info", last && res.correct ? "🏁 All levels done." : "This level comes back next time — you'll resume here."));
+        ctx.finish(res, { recorded: true });
       } else {
-        next.replaceChildren(h("button.primary.block", { type: "button", onclick: () => { step++; show(); } }, `Next level → ${step + 2}/${item.steps.length}`));
+        ctx.setActions({
+          primary: [`Next level → ${step + 2}/${item.steps.length}`, () => { ctx.setActions(null); step++; show(); }],
+          secondary: ["Stop here", () => { ctx.finish(res, { recorded: true }); ctx.advance(); }],
+        });
+        next.replaceChildren(h("p.small.muted.center", "Level passed. Carry on, or stop and resume from here next time."));
       }
     };
     box.replaceChildren(header, intro, codeTask(st, {
@@ -213,57 +209,54 @@ export function renderChallenge(item, ctx) {
 export function renderBug(item, ctx) {
   const t0 = now();
   const lines = item.code.replace(/\n$/, "").split("\n");
-  const fixedLines = item.fixed.replace(/\n$/, "").split("\n");
-  let wrongTaps = 0, done = false, found = false, editLine = null, usedChoices = false, attempts = 0;
+  let wrongTaps = 0, done = false, usedChoices = false, attempts = 0, ed = null;
   const out = h("div");
-  const list = h("div.codelines", { role: "list" });
+  const view = h("div");
   const actions = h("div.row.wrap");
 
   function finish(correct) {
     if (done) return;
     done = true;
     const score = correct ? Math.max(0.3, 1 - 0.2 * wrongTaps - (usedChoices ? 0.3 : 0) - 0.1 * Math.max(0, attempts - 1)) : 0;
+    actions.replaceChildren();
     out.append(h("div.lesson", h("div.kicker", "Why"), md(item.explanation)),
-      h("details", { open: !correct }, h("summary", "Fixed version"), pre(item.fixed)));
+      h("details", { open: !correct }, h("summary", "Reference fix"), pre(item.fixed)));
     ctx.finish({ correct, score, hints: wrongTaps, ms: now() - t0 });
   }
 
-  function renderLines() {
-    list.replaceChildren(...lines.map((src, i) => {
+  // Step 1: find the line. Each line is a big tap target.
+  function drawLines() {
+    view.replaceChildren(h("div.codelines", { role: "list" }, lines.map((src, i) => {
       const n = i + 1;
-      if (found && n === item.bugLine && !done) {
-        const inp = h("input", { type: "text", value: editLine ?? src, autocapitalize: "off", autocorrect: "off", spellcheck: false, "aria-label": `Edit line ${n}` });
-        inp.addEventListener("input", () => { editLine = inp.value; });
-        setTimeout(() => inp.focus(), 50);
-        return h("div.codeline.right", h("span.ln", n), inp);
-      }
-      const b = h("button.codeline", { type: "button", "aria-label": `Line ${n}` }, h("span.ln", n), h("span.src", (done && n === item.bugLine) ? fixedLines[i] ?? src : src || " "));
-      if (done && n === item.bugLine) b.classList.add("right");
+      const b = h("button.codeline", { type: "button", "aria-label": `Line ${n}` }, h("span.ln", n), h("span.src", src || " "));
       b.onclick = () => {
-        if (found || done) return;
-        if (n === item.bugLine) {
-          found = true;
-          out.replaceChildren(h("div.feedback.good", "Yes — that's the line. Now fix it in place and run the tests."));
-          renderLines();
-          renderActions();
-        } else {
-          wrongTaps++;
-          b.classList.add("wrong");
-          out.replaceChildren(h("div.feedback.bad", wrongTaps >= 3 ? "Look at the highlighted line." : "Not that one. Run the code in your head with the failing case."));
-          if (wrongTaps >= 3) { found = true; renderLines(); renderActions(); }
-        }
+        if (done) return;
+        if (n === item.bugLine) return openEditor("Yes — that's the line. Fix it (change as many lines as you need), then run the tests.");
+        wrongTaps++;
+        b.classList.add("wrong");
+        if (wrongTaps >= 3) openEditor(`It's line ${item.bugLine}. Fix it and run the tests.`);
+        else out.replaceChildren(h("div.feedback.bad", "Not that one. Run the failing case through the code in your head."));
       };
       return b;
-    }));
+    })));
+  }
+
+  // Step 2: fix it yourself in the editor, caret on the buggy line.
+  function openEditor(msg) {
+    out.replaceChildren(h("div.feedback.good", msg));
+    ed = codeEditor(item.code, { onRun: runFix });
+    view.replaceChildren(ed);
+    const pos = lines.slice(0, item.bugLine - 1).join("\n").length + (item.bugLine > 1 ? 1 : 0);
+    setTimeout(() => { ed.textarea.focus(); ed.textarea.setSelectionRange(pos + lines[item.bugLine - 1].length, pos + lines[item.bugLine - 1].length); }, 50);
+    drawActions();
   }
 
   async function runFix() {
-    const code = lines.map((l, i) => (i + 1 === item.bugLine ? (editLine ?? l) : l)).join("\n") + "\n";
     attempts++;
     out.replaceChildren(h("p.muted", py.isReady() ? "Running…" : "Loading Python…"));
-    const r = await py.runTests(code, item.tests);
+    const r = await py.runTests(ed.value, item.tests);
     out.replaceChildren(r.ok ? h("div.feedback.good", h("b", "Fixed — all tests pass.")) : h("div.feedback.bad", "Still failing."), testList(r));
-    if (r.ok) { lines[item.bugLine - 1] = editLine; renderLines(); renderActions(); finish(true); }
+    if (r.ok) finish(true);
   }
 
   function choices() {
@@ -275,24 +268,21 @@ export function renderBug(item, ctx) {
         out.querySelectorAll(".choice").forEach((x, j) => j === item.answer && x.classList.add("right"));
         if (i !== item.answer) b.classList.add("wrong");
         finish(i === item.answer);
-        renderLines();
-        actions.replaceChildren();
       };
       return b;
     })));
   }
 
-  function renderActions() {
-    if (done) return actions.replaceChildren();
+  function drawActions() {
     actions.replaceChildren(
-      found ? h("button.primary", { type: "button", onclick: runFix }, "▶ Run tests with my fix") : null,
+      ed ? h("button.primary", { type: "button", onclick: runFix }, "▶ Run tests with my fix") : null,
       h("button.ghost", { type: "button", onclick: choices }, "Pick the fix from options"),
-      h("button.ghost", { type: "button", onclick: () => { finish(false); renderLines(); renderActions(); } }, "Show answer"));
+      h("button.ghost", { type: "button", onclick: () => finish(false) }, "Show answer"));
   }
 
-  renderLines();
-  renderActions();
-  return h("div.stack", h("div.kicker", "Spot the bug — tap the broken line"), h("p", h("b", item.title)), list, actions, out, pyStatusLine());
+  drawLines();
+  drawActions();
+  return h("div.stack", h("div.kicker", "Spot the bug — tap the broken line"), h("p", h("b", item.title)), view, actions, out, pyStatusLine());
 }
 
 export function renderPredict(item, ctx) {
@@ -458,7 +448,7 @@ function gradeFlow(item, { prompt, rubric, getAnswer, after, ctx, t0, extra }) {
     const boxes = rubric.map(r => h("input", { type: "checkbox" }));
     out.replaceChildren(h("div.card.rubric",
       h("b", "Tick what your answer actually covered"),
-      rubric.map((r, i) => h("label", boxes[i], h("span", h("b", r.criterion), h("br"), h("span.small.muted", r.lookFor)))),
+      rubric.map((r, i) => h("label", boxes[i], h("span", h("b", r.criterion), r.lookFor ? [h("br"), h("span.small.muted", r.lookFor)] : null))),
       h("button.primary.block", {
         type: "button", style: { marginTop: "10px" }, onclick: e => {
           e.target.disabled = true;
@@ -486,7 +476,7 @@ const STAR = [
 export function renderBehavioral(item, ctx) {
   const t0 = now();
   const { ta, voice } = answerBox(item, "Record, dictate or type your answer (aim for ~2 minutes spoken).");
-  const rubric = [...STAR, ...item.lookFor.map(l => ({ criterion: l.length > 60 ? l.slice(0, 57) + "…" : l, lookFor: l, weight: 1 }))];
+  const rubric = [...STAR, ...item.lookFor.map(l => ({ criterion: l, lookFor: "", weight: 1 }))];
   const storyOut = h("div");
   const storyBtn = h("button.ghost", { type: "button" }, "📚 Which of my stories fits?");
   storyBtn.onclick = async () => {

@@ -6,14 +6,17 @@ import { h } from "./ui.js";
 const KEYS = ["⇥", "⇤", ":", "(", ")", "[", "]", "{", "}", "=", "\"", "'", "_", ".", ",", "#", "<", ">", "+", "-", "*", "/", "%", "!"];
 const PAIRS = { "(": ")", "[": "]", "{": "}", "\"": "\"", "'": "'" };
 
-export function codeEditor(value, { onChange, minHeight } = {}) {
+export function codeEditor(value, { onChange, minHeight, onRun } = {}) {
   const ta = h("textarea.editor", {
     spellcheck: false, autocapitalize: "off", autocomplete: "off", autocorrect: "off",
     "aria-label": "Code editor", wrap: "off", inputmode: "text",
   });
   ta.value = value || "";
   if (minHeight) ta.style.minHeight = minHeight;
-  const changed = () => onChange && onChange(ta.value);
+  // Grow with the code (min 6 lines) so Run stays close to the keyboard.
+  const fit = () => { ta.rows = Math.max(6, ta.value.split("\n").length + 1); };
+  const changed = () => { fit(); onChange && onChange(ta.value); };
+  fit();
 
   function insert(text, caretOffset = text.length) {
     const { selectionStart: s, selectionEnd: e, value: v } = ta;
@@ -50,6 +53,7 @@ export function codeEditor(value, { onChange, minHeight } = {}) {
   ta.addEventListener("input", changed);
 
   const bar = h("div.keybar", { role: "toolbar", "aria-label": "Code symbols" },
+    onRun ? h("button.primary", { type: "button", "aria-label": "Run tests (key bar)", onpointerdown: e => e.preventDefault(), onclick: onRun }, "▶") : null,
     KEYS.map(k => h("button", {
       type: "button", "aria-label": k === "⇥" ? "Indent" : k === "⇤" ? "Dedent" : `Insert ${k}`,
       // mousedown/preventDefault keeps the keyboard open on iOS

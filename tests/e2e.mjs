@@ -61,6 +61,8 @@ async function layoutAudit(page, label) {
       if (el.closest(".keybar") && b.height >= 44 && b.width >= 40) continue; // symbol keys: 44 tall, ≥40 wide
       if (b.height < 44 || b.width < 44) small.push(`${el.tagName.toLowerCase()}"${(el.innerText || el.getAttribute("aria-label") || "").trim().slice(0, 24)}" ${Math.round(b.width)}×${Math.round(b.height)}`);
     }
+    const text = document.getElementById("app").innerText;
+    if (/(^|\s)(null|undefined)(\s|$)|\[object /.test(text)) small.push("stray null/undefined/[object] text on screen");
     return { overflow, small };
   });
   return r;
