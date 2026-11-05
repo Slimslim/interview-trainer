@@ -59,5 +59,10 @@ persistence, export/import, coach with a mocked API). The self-review playthroug
 5. Deploy. The service worker picks up the new version on the next launch.
 
 ## Deploy
-Static files, no build server. Publish the repo root (GitHub Pages, Cloudflare
-Pages or Vercel). Run `python3 tools/build.py` first so `sw.js` lists the current files.
+Live at **https://slimslim.github.io/interview-trainer/** (GitHub Pages, served from the
+`gh-pages` branch). To publish changes:
+```bash
+bash tools/deploy.sh
+```
+It rebuilds the packs and `sw.js`, validates the content, and pushes `main` and `gh-pages`.
+Installed copies pick up the new version on their next launch.
