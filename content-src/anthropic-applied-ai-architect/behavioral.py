@@ -1,0 +1,141 @@
+"""Applied AI Architect, Industries: behavioral, pre-sales and values questions.
+
+`source` only for questions reported in research/anthropic-applied-ai-architect.md
+(S10 Glassdoor SA reports, S13 written 'Why Anthropic?'). The rest are practice.
+"""
+from _helpers import code
+
+
+def q(id, stage, question, lookFor, followUps, value=None, difficulty=2, tags=(), pattern="", source=None):
+    it = {
+        "id": "aia-bh-" + id,
+        "type": "behavioral",
+        "stage": stage,
+        "difficulty": difficulty,
+        "tags": list(tags),
+        "pattern": pattern,
+        "question": question,
+        "lookFor": lookFor,
+        "followUps": followUps,
+    }
+    if value:
+        it["value"] = value
+    if source:
+        it["source"] = source
+    return it
+
+
+ITEMS = [
+    # ---------- screen ----------
+    q("why-join", "screen", "Why do you want to join Anthropic?",
+      ["Specific reasons tied to the mission and to something you've read (RSP, Core Views, an engineering post).",
+       "Bridge from your industrial customer background to bringing Claude safely to industrial customers.",
+       "Evidence you've built with Claude yourself.",
+       "No generic enthusiasm or 'performing alignment'."],
+      ["Why this role and not engineering?", "What would you want to change at Anthropic?"],
+      value="Put the mission first", difficulty=1, tags=["motivation"], pattern="Specific, sourced motivation", source="S10"),
+    q("research-papers", "screen", "What are your views on Anthropic's research papers? Pick one you've read.",
+      ["Names a real paper/post (e.g. Building effective agents, Contextual Retrieval, Demystifying evals for AI agents, Core Views) and summarises it accurately.",
+       "Gives an opinion: what you applied, agreed with, or questioned.",
+       "Connects it to customer work (e.g. workflow vs agent choice, eval harnesses)."],
+      ["What would you tell a customer from that paper?", "What's missing from it?"],
+      value="Hold light and shade", difficulty=2, tags=["research", "motivation"], pattern="Engage with research", source="S10"),
+    q("stock-zero", "screen", "Would you be fine if the stock went to zero?",
+      ["Honest answer about motivation: mission and work over equity upside.",
+       "Shows you understand the mission could require hard choices (e.g. pausing development).",
+       "Doesn't sound rehearsed; acknowledges personal financial reality honestly."],
+      ["What would make you stay if compensation were lower than elsewhere?", "What does 'put the mission first' mean to you in practice?"],
+      value="Put the mission first", difficulty=2, tags=["motivation", "mission"], pattern="Mission over upside", source="S10"),
+    q("written-why", "screen", "In 150 words, write your answer to 'Why Anthropic?' for the application.",
+      ["Your own first draft (Claude may refine it, per Anthropic's candidate guidance).",
+       "2-3 specific reasons, one of them about safe deployment in industries like manufacturing.",
+       "One concrete proof point from your platform work."],
+      ["Which sentence would a recruiter remember?", "What did you cut?"],
+      value="Put the mission first", difficulty=1, tags=["application", "writing"], pattern="Concise written motivation", source="S13"),
+    q("pitch-industries", "screen", "Give me your 90-second pitch for this Industries role.",
+      ["Three beats: 10+ years technical customer-facing in industrial equipment (CH/CN/US) -> solo-built an AI platform in production -> wants to help industrial customers adopt Claude.",
+       "One crisp result from each phase.",
+       "Ends with why Anthropic specifically."],
+      ["Which industry would you be most useful in?", "What's your weakest area for this role?"],
+      difficulty=1, tags=["pitch"], pattern="Tight career narrative"),
+
+    # ---------- technical ----------
+    q("technical-presentation", "technical", "Tell me about a technical presentation you gave to a mixed audience of engineers and executives.",
+      ["How you structured for both audiences (business outcome first, details in backup).",
+       "A moment you adjusted live based on the room.",
+       "Outcome: decision made, deal progressed."],
+      ["What question surprised you?", "What would you do differently?"],
+      difficulty=2, tags=["presentation", "communication"], pattern="Present to mixed audiences"),
+    q("demo-failed", "technical", "Your live demo breaks in front of a customer. What do you do? Has it happened to you?",
+      ["Stays calm, explains what happened honestly, falls back (recording, screenshots, step-through).",
+       "Turns it into a discussion of failure modes and how production would handle them.",
+       "Follows up with a working version and a short write-up."],
+      ["How do you prepare demos to reduce risk?", "When would you not demo live?"],
+      value="Be helpful, honest, and harmless", difficulty=2, tags=["demo", "honesty"], pattern="Recover from a failed demo"),
+
+    # ---------- customer / pre-sales ----------
+    q("workshop-facilitation", "customer", "Describe how you'd run a half-day discovery workshop with a manufacturer's operations, IT and quality teams.",
+      ["Agenda with clear goals and roles; pre-work (process maps, sample documents).",
+       "Use-case brainstorm -> prioritisation by value, feasibility, risk -> 1-2 candidates.",
+       "Gets IT/security constraints and eval ownership on the table early.",
+       "Ends with a written recap, owners and next steps."],
+      ["How do you handle one loud stakeholder dominating?", "What do you do if the top use case is not a good fit for an LLM?"],
+      difficulty=2, tags=["workshop", "facilitation", "discovery"], pattern="Facilitate a discovery workshop"),
+    q("champion-left", "customer", "Your internal champion at a customer leaves halfway through a pilot. What do you do?",
+      ["Multi-threading: relationships beyond one person.",
+       "Re-establishes the business case and success metric with the new owner.",
+       "Example from your sales/service experience."],
+      ["How do you spot this risk early?", "What if the new person wants to cancel?"],
+      difficulty=2, tags=["pre-sales", "stakeholders"], pattern="Multi-thread the account"),
+    q("multi-stakeholder-deal", "customer", "Tell me about a complex sale with many stakeholders (technical, procurement, executives). How did you move it forward?",
+      ["Mapped stakeholders and their criteria (e.g. equipment buyer, plant engineer, finance).",
+       "Tailored technical proof to each (trials, acceptance tests, references).",
+       "Concrete outcome and timeline; what you'd do differently."],
+      ["Who almost blocked it?", "How did you work with your sales counterpart?"],
+      difficulty=2, tags=["pre-sales", "enterprise", "star"], pattern="Navigate a multi-stakeholder buying cycle"),
+    q("overpromise-sales", "customer", "Your account executive promised a customer something Claude can't reliably do. How do you handle it?",
+      ["Raises it privately with the AE first; aligns on the message.",
+       "Resets expectations with the customer honestly and proposes an achievable alternative with an eval.",
+       "Protects long-term trust over short-term deal pressure."],
+      ["What if the AE disagrees?", "Has something like this happened in your past roles?"],
+      value="Be helpful, honest, and harmless", difficulty=3, tags=["pre-sales", "honesty"], pattern="Correct over-promising"),
+    q("pattern-feedback", "customer", "Give an example of turning repeated customer feedback into a product or process change.",
+      ["Noticed a pattern across customers, not one complaint.",
+       "Quantified it and brought it to the right internal team.",
+       "Result, and how you closed the loop with customers."],
+      ["How would you do this at Anthropic?", "What if the product team disagreed?"],
+      difficulty=2, tags=["feedback", "product"], pattern="Field-to-product feedback loop"),
+
+    # ---------- values ----------
+    q("customer-no-safety", "values", "Tell me about a time you told a customer 'no' or 'not yet' for safety or quality reasons.",
+      ["Real situation with stakes (equipment limits, an unready AI workflow).",
+       "How you explained the risk and offered a path (smaller scope, test first).",
+       "Outcome and what it did to trust.",
+       "Connects to RSP/Core Views thinking without forcing it."],
+      ["Did it cost you the deal?", "Where is the line between caution and being unhelpful?"],
+      value="Be good to our users", difficulty=2, tags=["safety", "star"], pattern="Say no for safety"),
+    q("ethical-tradeoff", "values", "Describe an ambiguous ethical tradeoff you faced at work. How did you decide?",
+      ["Genuinely ambiguous (no obvious right answer).",
+       "How you reasoned, whom you consulted, what you decided.",
+       "Honest reflection on whether it was right."],
+      ["What would you do now?", "How would you handle a similar tradeoff for an AI deployment?"],
+      value="Hold light and shade", difficulty=3, tags=["ethics", "star"], pattern="Reason through ambiguity"),
+    q("admit-mistake", "values", "Tell me about a mistake you made, how you discovered it and how you fixed it.",
+      ["Ownership without excuses.",
+       "Immediate containment and transparent communication.",
+       "Systemic fix (check, guardrail, process) and what you learned."],
+      ["Who did you tell first?", "Could it happen again?"],
+      value="Be helpful, honest, and harmless", difficulty=2, tags=["ownership", "star"], pattern="Own and fix a mistake"),
+    q("agent-write-access", "values", "A customer wants an agent with unrestricted write access to their production systems. What do you do?",
+      ["Understands the business goal first.",
+       "Proposes least-privilege tools, approval gates for irreversible actions, audit logs, staged rollout.",
+       "Explains risk in the customer's terms; knows when to escalate internally."],
+      ["What if they insist?", "Which actions could safely run without approval?"],
+      value="Be good to our users", difficulty=2, tags=["guardrails", "scenario"], pattern="Safe default, customer-centred"),
+    q("regulated-sector-risk", "values", "What's the biggest risk of deploying LLMs in regulated industries like pharma or energy, and how would you help a customer manage it?",
+      ["Specific risk (e.g. confident wrong answers on safety-critical procedures, data leakage, unaccountable decisions).",
+       "Concrete mitigations: evals on real cases, citations, human approval, audit trail, scoped pilots.",
+       "Balanced: doesn't claim risks are solved; also doesn't discourage valuable use."],
+      ["How would you explain residual risk to a regulator?", "When would you advise not to use an LLM?"],
+      value="Hold light and shade", difficulty=3, tags=["regulated", "ai-risk"], pattern="Calibrated deployment risk"),
+]

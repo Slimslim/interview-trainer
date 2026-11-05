@@ -1,0 +1,15 @@
+{
+  "name": "Interview Trainer",
+  "short_name": "Trainer",
+  "description": "Daily 3–10 minute interview reps that build reflexes.",
+  "start_url": "./#home",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#121214",
+  "theme_color": "#c25a2c",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

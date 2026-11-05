@@ -15,15 +15,569 @@
    "title": "Greeting with an f-string",
    "prompt": "Write `greet(name, n)` that returns `'Hi Ada, you have 3 new messages'`.",
    "starter": "def greet(name, n):\n    pass\n",
-   "tests": "def test_basic():\n    assert greet(\"Ada\", 3) == \"Hi Ada, you have 3 new messages\"\ndef test_zero():\n    assert greet(\"Bo\", 0) == \"Hi Bo, you have 0 new messages\"\n",
+   "tests": "def test_basic():\n    assert greet(\"Ada\", 3) == \"Hi Ada, you have 3 new messages\", f\"got {greet('Ada', 3)!r}\"\ndef test_zero():\n    assert greet(\"Bo\", 0) == \"Hi Bo, you have 0 new messages\", f\"got {greet('Bo', 0)!r}\"\n",
    "hints": [
     "Python's template strings start with f before the quote.",
     "Inside an f-string, put expressions in {curly braces}.",
     "return f\"Hi {name}, you have ... new messages\""
    ],
    "solution": "def greet(name, n):\n    return f\"Hi {name}, you have {n} new messages\"\n",
-   "ts": "`Hi ${name}, you have ${n} new messages`",
-   "lesson": "f-strings are Python's template literals: f\"{expr}\". Format specs go after a colon: f\"{price:.2f}\"."
+   "lesson": "f-strings are Python's template literals: f\"{expr}\". Format specs go after a colon: f\"{price:.2f}\".",
+   "ts": "`Hi ${name}, you have ${n} new messages`"
+  },
+  {
+   "id": "cb-w1-format-spec",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "strings",
+    "f-strings",
+    "formatting"
+   ],
+   "pattern": "format spec",
+   "title": "Money with a format spec",
+   "prompt": "Write `money(x)` that returns e.g. `'$1,234.50'` for `1234.5` (thousands separator, 2 decimals).",
+   "starter": "def money(x):\n    pass\n",
+   "tests": "def test_thousands():\n    assert money(1234.5) == \"$1,234.50\", f\"money(1234.5) gave {money(1234.5)!r}\"\ndef test_small():\n    assert money(3) == \"$3.00\", f\"money(3) gave {money(3)!r}\"\ndef test_rounding():\n    assert money(1000000.456) == \"$1,000,000.46\", f\"got {money(1000000.456)!r}\"\n",
+   "hints": [
+    "The format spec goes after a colon inside the braces: {x:SPEC}.",
+    "'.2f' means two decimals; a comma before it adds thousands separators.",
+    "return f\"${x:,.2f}\""
+   ],
+   "solution": "def money(x):\n    return f\"${x:,.2f}\"\n",
+   "lesson": "Format specs live after the colon: `:,.2f` (thousands + 2 decimals), `:>8` (right-align), `:02d` (zero-pad), `:.1%` (percent).",
+   "ts": "'$' + x.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })"
+  },
+  {
+   "id": "cb-w1-slugify",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "strings",
+    "methods"
+   ],
+   "pattern": "str methods",
+   "title": "Slugify a title",
+   "prompt": "Write `slugify(title)`: trim surrounding whitespace, lowercase, and replace spaces with `-`.\n\n`'  Hello World '` → `'hello-world'`",
+   "starter": "def slugify(title):\n    pass\n",
+   "tests": "def test_basic():\n    assert slugify(\"  Hello World \") == \"hello-world\", f\"got {slugify('  Hello World ')!r}\"\ndef test_three():\n    assert slugify(\"Fast API Tips\") == \"fast-api-tips\", f\"got {slugify('Fast API Tips')!r}\"\n",
+   "hints": [
+    "Strings have methods for each step; they return new strings (strings are immutable).",
+    "The methods are .strip(), .lower() and .replace(old, new). Chain them.",
+    "return title.strip().lower().replace(\" \", \"-\")"
+   ],
+   "solution": "def slugify(title):\n    return title.strip().lower().replace(\" \", \"-\")\n",
+   "lesson": "`strip` = JS `trim`, `lower` = `toLowerCase`, `replace` replaces ALL occurrences by default (unlike JS `replace` with a string).",
+   "ts": "title.trim().toLowerCase().replaceAll(' ', '-')"
+  },
+  {
+   "id": "cb-w1-split-join",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "strings",
+    "lists"
+   ],
+   "pattern": "split/join",
+   "title": "Reverse the words",
+   "prompt": "Write `reverse_words(s)`: `'the quick  fox'` → `'fox quick the'` (collapse extra spaces).",
+   "starter": "def reverse_words(s):\n    pass\n",
+   "tests": "def test_basic():\n    assert reverse_words(\"the quick  fox\") == \"fox quick the\", f\"got {reverse_words('the quick  fox')!r}\"\ndef test_single():\n    assert reverse_words(\"  hi \") == \"hi\", f\"got {reverse_words('  hi ')!r}\"\n",
+   "hints": [
+    "split() with no argument splits on any run of whitespace and drops empties.",
+    "Reverse the list with a slice, then glue it back with a string's join method.",
+    "return \" \".join(s.split()[::-1])"
+   ],
+   "solution": "def reverse_words(s):\n    return \" \".join(s.split()[::-1])\n",
+   "lesson": "In Python `join` is a method on the separator: `\" \".join(parts)`. `s.split()` (no arg) handles any whitespace run.",
+   "ts": "s.trim().split(/\\s+/).reverse().join(' ')",
+   "alternative": "def reverse_words(s):\n    return \" \".join(reversed(s.split()))\n"
+  },
+  {
+   "id": "cb-w1-palindrome",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "strings",
+    "slicing",
+    "comprehension"
+   ],
+   "pattern": "slicing",
+   "title": "Palindrome check",
+   "prompt": "Write `is_palindrome(s)` that ignores case and anything that is not a letter or digit.\n\n`'A man, a plan, a canal: Panama'` → `True`",
+   "starter": "def is_palindrome(s):\n    pass\n",
+   "tests": "def test_true():\n    assert is_palindrome(\"A man, a plan, a canal: Panama\") is True, \"classic palindrome should be True\"\ndef test_false():\n    assert is_palindrome(\"race a car\") is False, \"'race a car' is not a palindrome\"\ndef test_empty():\n    assert is_palindrome(\"\") is True, \"empty string counts as a palindrome\"\n",
+   "hints": [
+    "First build a cleaned, lowercased string; then compare it with its reverse.",
+    "c.isalnum() tests a character; \"\".join(... for c in s) builds the cleaned string; s[::-1] reverses.",
+    "t = \"\".join(c.lower() for c in s if c.isalnum()); return t == t[::-1]"
+   ],
+   "solution": "def is_palindrome(s):\n    t = \"\".join(c.lower() for c in s if c.isalnum())\n    return t == t[::-1]\n",
+   "lesson": "`s[::-1]` reverses any sequence. A generator inside `\"\".join(...)` is the idiomatic way to filter characters.",
+   "ts": "const t = s.toLowerCase().replace(/[^a-z0-9]/g, ''); return t === [...t].reverse().join('')"
+  },
+  {
+   "id": "cb-w1-list-comp",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "lists",
+    "comprehension"
+   ],
+   "pattern": "list comprehension",
+   "title": "Squares of the evens",
+   "prompt": "Write `even_squares(nums)` returning the squares of the even numbers, in order, in ONE expression.",
+   "starter": "def even_squares(nums):\n    pass\n",
+   "tests": "def test_basic():\n    assert even_squares([1, 2, 3, 4]) == [4, 16], f\"got {even_squares([1, 2, 3, 4])!r}\"\ndef test_empty():\n    assert even_squares([]) == [], \"empty in, empty out\"\ndef test_negative():\n    assert even_squares([-2, 5]) == [4], f\"got {even_squares([-2, 5])!r}\"\n",
+   "hints": [
+    "A list comprehension is [expression for item in iterable if condition].",
+    "Even means n % 2 == 0; square is n * n or n ** 2.",
+    "return [n * n for n in nums if n % 2 == 0]"
+   ],
+   "solution": "def even_squares(nums):\n    return [n * n for n in nums if n % 2 == 0]\n",
+   "lesson": "`[expr for x in xs if cond]` replaces `.filter().map()`. Read it left to right: what you produce, then where it comes from, then the filter.",
+   "ts": "nums.filter(n => n % 2 === 0).map(n => n * n)"
+  },
+  {
+   "id": "cb-w1-flatten",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "lists",
+    "comprehension"
+   ],
+   "pattern": "nested comprehension",
+   "title": "Flatten a grid",
+   "prompt": "Write `flatten(grid)`: `[[1, 2], [3], []]` → `[1, 2, 3]`, using a single comprehension.",
+   "starter": "def flatten(grid):\n    pass\n",
+   "tests": "def test_basic():\n    assert flatten([[1, 2], [3], []]) == [1, 2, 3], f\"got {flatten([[1, 2], [3], []])!r}\"\ndef test_empty():\n    assert flatten([]) == [], \"empty grid gives []\"\n",
+   "hints": [
+    "Two `for` clauses can live in one comprehension.",
+    "The for clauses go in the same order as nested loops: outer first.",
+    "return [x for row in grid for x in row]"
+   ],
+   "solution": "def flatten(grid):\n    return [x for row in grid for x in row]\n",
+   "lesson": "Nested comprehensions read like nested loops written on one line: `[x for row in grid for x in row]` — outer loop first.",
+   "ts": "grid.flat()"
+  },
+  {
+   "id": "cb-w1-dict-get",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "dict",
+    "counting"
+   ],
+   "pattern": "dict.get",
+   "title": "Count words with dict.get",
+   "prompt": "Write `count_words(words)` returning a dict word → count, using a plain dict (no imports).",
+   "starter": "def count_words(words):\n    pass\n",
+   "tests": "def test_basic():\n    got = count_words([\"a\", \"b\", \"a\"])\n    assert got == {\"a\": 2, \"b\": 1}, f\"got {got!r}\"\ndef test_empty():\n    assert count_words([]) == {}, \"no words gives {}\"\n",
+   "hints": [
+    "Loop over words and bump a counter for each one.",
+    "d.get(key, default) returns the default instead of raising KeyError.",
+    "counts[w] = counts.get(w, 0) + 1"
+   ],
+   "solution": "def count_words(words):\n    counts = {}\n    for w in words:\n        counts[w] = counts.get(w, 0) + 1\n    return counts\n",
+   "lesson": "`d[k]` raises KeyError for a missing key; `d.get(k, 0)` doesn't. (Week 2: `collections.Counter` does this for you.)",
+   "ts": "counts[w] = (counts[w] ?? 0) + 1"
+  },
+  {
+   "id": "cb-w1-dict-comp",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "dict",
+    "comprehension"
+   ],
+   "pattern": "dict comprehension",
+   "title": "Invert a dict",
+   "prompt": "Write `invert(d)` that swaps keys and values: `{'a': 1, 'b': 2}` → `{1: 'a', 2: 'b'}`.",
+   "starter": "def invert(d):\n    pass\n",
+   "tests": "def test_basic():\n    assert invert({\"a\": 1, \"b\": 2}) == {1: \"a\", 2: \"b\"}, f\"got {invert({'a': 1, 'b': 2})!r}\"\ndef test_empty():\n    assert invert({}) == {}, \"empty dict gives {}\"\n",
+   "hints": [
+    "A dict comprehension uses braces and key: value.",
+    "d.items() yields (key, value) pairs you can unpack in the for clause.",
+    "return {v: k for k, v in d.items()}"
+   ],
+   "solution": "def invert(d):\n    return {v: k for k, v in d.items()}\n",
+   "lesson": "`{k: v for ...}` builds a dict; iterate `d.items()` to get key and value together (plain `for k in d` gives keys only).",
+   "ts": "Object.fromEntries(Object.entries(d).map(([k, v]) => [v, k]))"
+  },
+  {
+   "id": "cb-w1-set-ops",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "set"
+   ],
+   "pattern": "set operations",
+   "title": "Common elements",
+   "prompt": "Write `common(a, b)` returning the values present in both lists, sorted ascending, without duplicates.",
+   "starter": "def common(a, b):\n    pass\n",
+   "tests": "def test_basic():\n    assert common([3, 1, 2, 2], [2, 3, 4]) == [2, 3], f\"got {common([3, 1, 2, 2], [2, 3, 4])!r}\"\ndef test_none():\n    assert common([1], [2]) == [], \"nothing shared gives []\"\n",
+   "hints": [
+    "Turn both lists into sets.",
+    "The & operator is set intersection; sorted() turns any iterable into a sorted list.",
+    "return sorted(set(a) & set(b))"
+   ],
+   "solution": "def common(a, b):\n    return sorted(set(a) & set(b))\n",
+   "lesson": "Sets have operators: `&` intersection, `|` union, `-` difference, `^` symmetric difference. Membership is O(1) on average.",
+   "ts": "[...new Set(a)].filter(x => new Set(b).has(x)).sort((x, y) => x - y)"
+  },
+  {
+   "id": "cb-w1-enumerate",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "loops",
+    "enumerate"
+   ],
+   "pattern": "enumerate",
+   "title": "Numbered list",
+   "prompt": "Write `numbered(items)`: `['eggs', 'milk']` → `['1. eggs', '2. milk']`.",
+   "starter": "def numbered(items):\n    pass\n",
+   "tests": "def test_basic():\n    assert numbered([\"eggs\", \"milk\"]) == [\"1. eggs\", \"2. milk\"], f\"got {numbered(['eggs', 'milk'])!r}\"\ndef test_empty():\n    assert numbered([]) == [], \"empty in, empty out\"\n",
+   "hints": [
+    "Don't use range(len(items)): there's a builtin that yields (index, item).",
+    "enumerate(items, start=1) starts counting at 1.",
+    "return [f\"{i}. {x}\" for i, x in enumerate(items, start=1)]"
+   ],
+   "solution": "def numbered(items):\n    return [f\"{i}. {x}\" for i, x in enumerate(items, start=1)]\n",
+   "lesson": "`enumerate(xs, start=1)` gives (index, value) pairs — Python's answer to `forEach((x, i) => ...)`.",
+   "ts": "items.map((x, i) => `${i + 1}. ${x}`)"
+  },
+  {
+   "id": "cb-w1-zip",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "loops",
+    "zip",
+    "dict"
+   ],
+   "pattern": "zip",
+   "title": "Zip into a dict",
+   "prompt": "Write `to_dict(keys, values)`: `(['a', 'b'], [1, 2])` → `{'a': 1, 'b': 2}`. One line.",
+   "starter": "def to_dict(keys, values):\n    pass\n",
+   "tests": "def test_basic():\n    assert to_dict([\"a\", \"b\"], [1, 2]) == {\"a\": 1, \"b\": 2}, f\"got {to_dict(['a', 'b'], [1, 2])!r}\"\ndef test_uneven():\n    assert to_dict([\"a\", \"b\", \"c\"], [1]) == {\"a\": 1}, \"zip stops at the shorter input\"\n",
+   "hints": [
+    "There's a builtin that walks two iterables in lockstep.",
+    "zip(keys, values) yields pairs; dict() accepts an iterable of pairs.",
+    "return dict(zip(keys, values))"
+   ],
+   "solution": "def to_dict(keys, values):\n    return dict(zip(keys, values))\n",
+   "lesson": "`zip(a, b)` pairs items and stops at the shortest input (`zip(a, b, strict=True)` raises instead). `dict(pairs)` builds a dict.",
+   "ts": "Object.fromEntries(keys.map((k, i) => [k, values[i]]))"
+  },
+  {
+   "id": "cb-w1-fizzbuzz",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "loops",
+    "print"
+   ],
+   "pattern": "for loop + print",
+   "title": "FizzBuzz to 15 (print it)",
+   "prompt": "At top level, PRINT the numbers 1..15, one per line, but `Fizz` for multiples of 3, `Buzz` for 5, `FizzBuzz` for both.",
+   "starter": "for i in range(1, 16):\n    pass\n",
+   "tests": "EXPECTED = [\"1\", \"2\", \"Fizz\", \"4\", \"Buzz\", \"Fizz\", \"7\", \"8\", \"Fizz\", \"Buzz\",\n            \"11\", \"Fizz\", \"13\", \"14\", \"FizzBuzz\"]\ndef test_output():\n    got = captured_output.split()\n    assert got == EXPECTED, f\"expected {EXPECTED}, printed {got}\"\n",
+   "hints": [
+    "range(1, 16) stops BEFORE 16. Use % to test divisibility.",
+    "Check the 'both' case first (i % 15 == 0), then 3, then 5, else the number.",
+    "if i % 15 == 0: print(\"FizzBuzz\") / elif i % 3 == 0: ... / elif i % 5 == 0: ... / else: print(i)"
+   ],
+   "solution": "for i in range(1, 16):\n    if i % 15 == 0:\n        print(\"FizzBuzz\")\n    elif i % 3 == 0:\n        print(\"Fizz\")\n    elif i % 5 == 0:\n        print(\"Buzz\")\n    else:\n        print(i)\n",
+   "lesson": "`range(a, b)` is half-open [a, b). It's `elif`, not `else if`. `print` adds a newline itself.",
+   "ts": "for (let i = 1; i <= 15; i++) console.log(i % 15 === 0 ? 'FizzBuzz' : ...)"
+  },
+  {
+   "id": "cb-w1-sorted-key",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "sorting",
+    "lambda"
+   ],
+   "pattern": "sorted key=",
+   "title": "Longest first, ties alphabetical",
+   "prompt": "Write `longest_first(words)`: sort by length descending; equal lengths in alphabetical order.",
+   "starter": "def longest_first(words):\n    pass\n",
+   "tests": "def test_basic():\n    got = longest_first([\"bb\", \"a\", \"ccc\", \"aa\"])\n    assert got == [\"ccc\", \"aa\", \"bb\", \"a\"], f\"got {got!r}\"\ndef test_no_mutation():\n    w = [\"b\", \"aa\"]\n    longest_first(w)\n    assert w == [\"b\", \"aa\"], \"don't sort the caller's list in place\"\n",
+   "hints": [
+    "sorted() returns a new list and takes a key= function.",
+    "A key can return a tuple: it compares element by element. Negate the length to get descending.",
+    "return sorted(words, key=lambda w: (-len(w), w))"
+   ],
+   "solution": "def longest_first(words):\n    return sorted(words, key=lambda w: (-len(w), w))\n",
+   "lesson": "Python sorts with `key=` (a one-arg function), not a comparator. Tuple keys give multi-level sorts; `-x` flips one level.",
+   "ts": "[...words].sort((a, b) => b.length - a.length || a.localeCompare(b))"
+  },
+  {
+   "id": "cb-w1-max-key",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "sorting",
+    "lambda",
+    "dict"
+   ],
+   "pattern": "max key=",
+   "title": "Oldest person",
+   "prompt": "`people` is a list of dicts like `{'name': 'Ada', 'age': 36}`. Write `oldest(people)` returning the NAME of the oldest.",
+   "starter": "def oldest(people):\n    pass\n",
+   "tests": "PEOPLE = [{\"name\": \"Ada\", \"age\": 36}, {\"name\": \"Linus\", \"age\": 54}, {\"name\": \"Grace\", \"age\": 45}]\ndef test_basic():\n    assert oldest(PEOPLE) == \"Linus\", f\"got {oldest(PEOPLE)!r}\"\ndef test_one():\n    assert oldest([{\"name\": \"Bo\", \"age\": 1}]) == \"Bo\", \"single person\"\n",
+   "hints": [
+    "max() takes the same key= argument as sorted().",
+    "The key gets one person dict and returns what to compare: p[\"age\"].",
+    "return max(people, key=lambda p: p[\"age\"])[\"name\"]"
+   ],
+   "solution": "def oldest(people):\n    return max(people, key=lambda p: p[\"age\"])[\"name\"]\n",
+   "lesson": "`max(xs, key=f)` / `min(xs, key=f)` return the ELEMENT with the biggest f(x) — no reduce needed. Add `default=` for empty inputs.",
+   "ts": "people.reduce((a, b) => (b.age > a.age ? b : a)).name"
+  },
+  {
+   "id": "cb-w1-defaults-kwargs",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "functions",
+    "keyword args"
+   ],
+   "pattern": "default args",
+   "title": "Defaults and keyword args",
+   "prompt": "Write `make_url(path, host='localhost', port=8000)` returning `'http://HOST:PORT/PATH'`.",
+   "starter": "def make_url(path):\n    pass\n",
+   "tests": "def test_defaults():\n    assert make_url(\"api\") == \"http://localhost:8000/api\", f\"got {make_url('api')!r}\"\ndef test_keyword():\n    got = make_url(\"x\", port=9000)\n    assert got == \"http://localhost:9000/x\", f\"make_url('x', port=9000) gave {got!r}\"\ndef test_all():\n    assert make_url(\"y\", \"example.com\", 80) == \"http://example.com:80/y\", \"positional host and port\"\n",
+   "hints": [
+    "Default values go in the signature: def f(a, b=1).",
+    "Callers can skip host and pass port=9000 by name; your signature needs both defaults.",
+    "def make_url(path, host=\"localhost\", port=8000): return f\"http://{host}:{port}/{path}\""
+   ],
+   "solution": "def make_url(path, host=\"localhost\", port=8000):\n    return f\"http://{host}:{port}/{path}\"\n",
+   "lesson": "Any parameter can be passed by name (`port=9000`), so Python rarely needs an options object. Defaults must come after non-defaults.",
+   "ts": "function makeUrl(path: string, { host = 'localhost', port = 8000 } = {})"
+  },
+  {
+   "id": "cb-w1-star-args",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "functions",
+    "args"
+   ],
+   "pattern": "*args",
+   "title": "Sum any number of args",
+   "prompt": "Write `total(...)` so that `total()` → 0, `total(1, 2, 3)` → 6.",
+   "starter": "def total():\n    pass\n",
+   "tests": "def test_many():\n    assert total(1, 2, 3) == 6, f\"total(1, 2, 3) gave {total(1, 2, 3)!r}\"\ndef test_none():\n    assert total() == 0, \"total() should be 0\"\ndef test_spread():\n    nums = [4, 5]\n    assert total(*nums) == 9, \"total(*nums) should spread the list\"\n",
+   "hints": [
+    "A starred parameter collects extra positional args into a tuple.",
+    "def total(*nums): ... and nums is a tuple; sum() adds an iterable.",
+    "def total(*nums): return sum(nums)"
+   ],
+   "solution": "def total(*nums):\n    return sum(nums)\n",
+   "lesson": "`*args` collects positionals into a tuple (TS rest params). At the CALL site, `f(*xs)` spreads a list and `f(**d)` spreads a dict.",
+   "ts": "function total(...nums: number[]) { return nums.reduce((a, b) => a + b, 0) }"
+  },
+  {
+   "id": "cb-w1-kwargs",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "functions",
+    "kwargs"
+   ],
+   "pattern": "**kwargs",
+   "title": "HTML tag with **kwargs",
+   "prompt": "Write `tag(name, **attrs)`: `tag('a', href='/', id='x')` → `'<a href=\"/\" id=\"x\">'`. Keep the order the attrs were passed.",
+   "starter": "def tag(name):\n    pass\n",
+   "tests": "def test_attrs():\n    got = tag(\"a\", href=\"/\", id=\"x\")\n    assert got == '<a href=\"/\" id=\"x\">', f\"got {got!r}\"\ndef test_bare():\n    assert tag(\"br\") == \"<br>\", f\"tag('br') gave {tag('br')!r}\"\n",
+   "hints": [
+    "**attrs collects keyword args into a dict (insertion order is kept).",
+    "Build ' key=\"value\"' for each item in attrs.items() and join them.",
+    "parts = \"\".join(f' {k}=\"{v}\"' for k, v in attrs.items()); return f\"<{name}{parts}>\""
+   ],
+   "solution": "def tag(name, **attrs):\n    parts = \"\".join(f' {k}=\"{v}\"' for k, v in attrs.items())\n    return f\"<{name}{parts}>\"\n",
+   "lesson": "`**kwargs` collects named args into a dict. Dicts keep insertion order (guaranteed since 3.7).",
+   "ts": "function tag(name: string, attrs: Record<string, string> = {})"
+  },
+  {
+   "id": "cb-w1-kw-only",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "functions",
+    "keyword args"
+   ],
+   "pattern": "keyword-only args",
+   "title": "Force a keyword argument",
+   "prompt": "Write `connect(host, timeout=5)` returning `f'{host}:{timeout}'`, but make `timeout` keyword-only: `connect('db', 10)` must raise TypeError.",
+   "starter": "def connect(host, timeout=5):\n    pass\n",
+   "tests": "def test_default():\n    assert connect(\"db\") == \"db:5\", f\"got {connect('db')!r}\"\ndef test_named():\n    assert connect(\"db\", timeout=10) == \"db:10\", \"timeout=10 should work\"\ndef test_positional_rejected():\n    try:\n        connect(\"db\", 10)\n    except TypeError:\n        return\n    assert False, \"connect('db', 10) should raise TypeError (timeout is keyword-only)\"\n",
+   "hints": [
+    "A bare marker in the parameter list makes everything after it keyword-only.",
+    "The marker is a lone star: def f(a, *, b=1).",
+    "def connect(host, *, timeout=5): return f\"{host}:{timeout}\""
+   ],
+   "solution": "def connect(host, *, timeout=5):\n    return f\"{host}:{timeout}\"\n",
+   "lesson": "A bare `*` in the signature forces the following params to be named — great for booleans and timeouts (`sort(key=..., reverse=True)` works this way).",
+   "ts": "function connect(host: string, { timeout = 5 }: { timeout?: number } = {})"
+  },
+  {
+   "id": "cb-w1-main-guard",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "modules",
+    "functions"
+   ],
+   "pattern": "__name__ guard",
+   "title": "The main guard",
+   "prompt": "Define `main()` that prints `ready`, and call it ONLY when the file is run as a script (not when imported).",
+   "starter": "def main():\n    pass\n",
+   "tests": "import io, contextlib\ndef test_main_prints():\n    buf = io.StringIO()\n    with contextlib.redirect_stdout(buf):\n        main()\n    assert buf.getvalue().strip() == \"ready\", f\"main() printed {buf.getvalue()!r}\"\ndef test_not_run_on_import():\n    assert captured_output == \"\", \"main() ran on import — wrap the call in the __name__ check\"\n",
+   "hints": [
+    "Python sets a module-level variable to \"__main__\" only for the file you run directly.",
+    "if __name__ == \"__main__\": goes at the bottom, unindented.",
+    "def main(): print(\"ready\")  then  if __name__ == \"__main__\": main()"
+   ],
+   "solution": "def main():\n    print(\"ready\")\n\n\nif __name__ == \"__main__\":\n    main()\n",
+   "lesson": "`if __name__ == \"__main__\":` runs code only when the file is executed directly, so the module stays importable (and testable) without side effects.",
+   "ts": "if (require.main === module) main()  // or import.meta.main"
+  },
+  {
+   "id": "cb-w1-try-except",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "exceptions"
+   ],
+   "pattern": "try/except",
+   "title": "Parse an int safely",
+   "prompt": "Write `parse_int(s, default=0)` returning `int(s)`, or `default` if `s` isn't a valid integer.",
+   "starter": "def parse_int(s, default=0):\n    pass\n",
+   "tests": "def test_ok():\n    assert parse_int(\"42\") == 42, f\"got {parse_int('42')!r}\"\ndef test_bad():\n    assert parse_int(\"4x\") == 0, f\"got {parse_int('4x')!r}\"\ndef test_custom_default():\n    assert parse_int(\"\", default=-1) == -1, \"should return the given default\"\n",
+   "hints": [
+    "int('4x') raises an exception; catch that specific one.",
+    "The exception is ValueError. Avoid a bare except: it hides real bugs.",
+    "try: return int(s) / except ValueError: return default"
+   ],
+   "solution": "def parse_int(s, default=0):\n    try:\n        return int(s)\n    except ValueError:\n        return default\n",
+   "lesson": "Catch the narrowest exception (`except ValueError:`), never a bare `except:`. Python favours EAFP: try it, handle the failure.",
+   "ts": "const n = Number.parseInt(s, 10); return Number.isNaN(n) ? def : n"
+  },
+  {
+   "id": "cb-w1-raise",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "exceptions"
+   ],
+   "pattern": "raise",
+   "title": "Raise on bad input",
+   "prompt": "Write `withdraw(balance, amount)` returning the new balance, but raise `ValueError('insufficient funds')` if `amount > balance`.",
+   "starter": "def withdraw(balance, amount):\n    pass\n",
+   "tests": "def test_ok():\n    assert withdraw(100, 30) == 70, f\"got {withdraw(100, 30)!r}\"\ndef test_raises():\n    try:\n        withdraw(10, 50)\n    except ValueError as e:\n        assert \"insufficient\" in str(e), f\"message was {e!r}\"\n        return\n    assert False, \"withdraw(10, 50) should raise ValueError\"\n",
+   "hints": [
+    "Python uses raise, not throw.",
+    "Create the exception by calling the class with a message: ValueError(\"...\").",
+    "if amount > balance: raise ValueError(\"insufficient funds\")"
+   ],
+   "solution": "def withdraw(balance, amount):\n    if amount > balance:\n        raise ValueError(\"insufficient funds\")\n    return balance - amount\n",
+   "lesson": "`raise ValueError(\"msg\")` — pick a built-in that fits (ValueError for bad values, TypeError for wrong types, KeyError for missing keys).",
+   "ts": "if (amount > balance) throw new Error('insufficient funds')"
+  },
+  {
+   "id": "cb-w1-try-else-finally",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 2,
+   "tags": [
+    "exceptions"
+   ],
+   "pattern": "try/else/finally",
+   "title": "try / except / else / finally",
+   "prompt": "Write `safe_div(a, b, log)`: return `a / b`, or `None` on division by zero. Append to `log`: `'div0'` on error, `'ok'` on success, and ALWAYS `'done'` last.",
+   "starter": "def safe_div(a, b, log):\n    pass\n",
+   "tests": "def test_ok():\n    log = []\n    assert safe_div(6, 3, log) == 2, \"6 / 3 should be 2\"\n    assert log == [\"ok\", \"done\"], f\"log was {log}\"\ndef test_zero():\n    log = []\n    assert safe_div(1, 0, log) is None, \"division by zero returns None\"\n    assert log == [\"div0\", \"done\"], f\"log was {log}\"\n",
+   "hints": [
+    "`else:` runs only if the try block raised nothing; `finally:` runs no matter what — even after return.",
+    "Put the division in try, catch ZeroDivisionError, log 'ok' in else, 'done' in finally.",
+    "try: r = a / b / except ZeroDivisionError: log.append(\"div0\"); return None / else: log.append(\"ok\"); return r / finally: log.append(\"done\")"
+   ],
+   "solution": "def safe_div(a, b, log):\n    try:\n        r = a / b\n    except ZeroDivisionError:\n        log.append(\"div0\")\n        return None\n    else:\n        log.append(\"ok\")\n        return r\n    finally:\n        log.append(\"done\")\n",
+   "lesson": "`else` keeps the happy path out of the try (so you don't accidentally catch its errors); `finally` is for cleanup and runs even after `return`.",
+   "ts": "try { ... } catch (e) { ... } finally { ... }  // TS has no else clause"
+  },
+  {
+   "id": "cb-w1-divmod",
+   "type": "code",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "math",
+    "f-strings",
+    "formatting"
+   ],
+   "pattern": "divmod",
+   "title": "Seconds to HH:MM:SS",
+   "prompt": "Write `to_hms(seconds)`: `3723` → `'01:02:03'`.",
+   "starter": "def to_hms(seconds):\n    pass\n",
+   "tests": "def test_basic():\n    assert to_hms(3723) == \"01:02:03\", f\"got {to_hms(3723)!r}\"\ndef test_zero():\n    assert to_hms(0) == \"00:00:00\", f\"got {to_hms(0)!r}\"\ndef test_big():\n    assert to_hms(36000 + 59) == \"10:00:59\", f\"got {to_hms(36059)!r}\"\n",
+   "hints": [
+    "// is integer division and % is remainder; divmod(a, b) returns both at once.",
+    "h, rest = divmod(seconds, 3600); m, s = divmod(rest, 60). Zero-pad with the format spec :02.",
+    "return f\"{h:02}:{m:02}:{s:02}\""
+   ],
+   "solution": "def to_hms(seconds):\n    h, rest = divmod(seconds, 3600)\n    m, s = divmod(rest, 60)\n    return f\"{h:02}:{m:02}:{s:02}\"\n",
+   "lesson": "`/` always gives a float in Python 3; `//` floors. `divmod(a, b)` returns `(a // b, a % b)` — unpack it directly.",
+   "ts": "const h = Math.floor(s / 3600); ... String(h).padStart(2, '0')"
   },
   {
    "id": "cb-w1-slice-rev",
@@ -45,7 +599,341 @@
     "hon"
    ],
    "answer": 0,
-   "explanation": "s[::-1] reverses to 'nohtyp'; [:3] takes the first three characters."
+   "explanation": "s[::-1] reverses to 'nohtyp'; [:3] takes the first three characters.",
+   "ts": "[...s].reverse().join('').slice(0, 3)"
+  },
+  {
+   "id": "cb-w1-slice-neg",
+   "type": "predict",
+   "kind": "output",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "slicing",
+    "lists"
+   ],
+   "pattern": "slicing",
+   "question": "What does this print?",
+   "choices": [
+    "[40, 50] [20, 30, 40]",
+    "[40] [20, 30, 40, 50]",
+    "[50, 40] [20, 30, 40]",
+    "[40, 50] [20, 30]"
+   ],
+   "answer": 0,
+   "explanation": "Negative indexes count from the end. Slices are half-open: xs[1:-1] drops the first and last element.",
+   "code": "xs = [10, 20, 30, 40, 50]\nprint(xs[-2:], xs[1:-1])\n",
+   "ts": "xs.slice(-2), xs.slice(1, -1)"
+  },
+  {
+   "id": "cb-w1-truthiness",
+   "type": "predict",
+   "kind": "output",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "truthiness"
+   ],
+   "pattern": "truthiness",
+   "question": "What does this print?",
+   "choices": [
+    "False True False False",
+    "False False False False",
+    "True True False True",
+    "False True True False"
+   ],
+   "answer": 0,
+   "explanation": "Empty containers and zero are falsy. \"0\" is a non-empty string, so it's truthy. Same as JS except [] and {} — those are truthy in JS but falsy in Python.",
+   "code": "print(bool([]), bool(\"0\"), bool(0.0), bool({}))\n",
+   "ts": "In JS, [] and {} are truthy; in Python they're falsy."
+  },
+  {
+   "id": "cb-w1-floordiv",
+   "type": "predict",
+   "kind": "output",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "math"
+   ],
+   "pattern": "integer division",
+   "question": "What does this print?",
+   "choices": [
+    "3 -4 2 3.5",
+    "3 -3 -1 3.5",
+    "3 -4 -1 3",
+    "3 -3 2 3.5"
+   ],
+   "answer": 0,
+   "explanation": "// floors toward negative infinity (so -7 // 2 is -4, not -3), and % takes the sign of the divisor (-7 % 3 is 2). / always returns a float.",
+   "code": "print(7 // 2, -7 // 2, -7 % 3, 7 / 2)\n",
+   "ts": "Math.trunc(-7 / 2) is -3 and -7 % 3 is -1 in JS — Python differs on both."
+  },
+  {
+   "id": "cb-w1-alias",
+   "type": "predict",
+   "kind": "output",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "lists",
+    "mutability"
+   ],
+   "pattern": "mutability",
+   "question": "What does this print?",
+   "choices": [
+    "[1, 2, 3]",
+    "[1, 2]",
+    "[1, 2, 3, 4]",
+    "[1, 2, 4]"
+   ],
+   "answer": 0,
+   "explanation": "b = a copies the reference, so appending via b changes a. a[:] (or list(a) / a.copy()) makes a shallow copy, so c is independent.",
+   "code": "a = [1, 2]\nb = a\nb.append(3)\nc = a[:]\nc.append(4)\nprint(a)\n",
+   "ts": "Same as JS: const b = a shares; [...a] copies."
+  },
+  {
+   "id": "cb-w1-star-unpack",
+   "type": "predict",
+   "kind": "output",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "unpacking"
+   ],
+   "pattern": "unpacking",
+   "question": "What does this print?",
+   "choices": [
+    "1 [2, 3, 4]",
+    "1 (2, 3, 4)",
+    "1 2",
+    "[1] [2, 3, 4]"
+   ],
+   "answer": 0,
+   "explanation": "A starred target collects the remaining items into a LIST (not a tuple). Unpacking works on any iterable; `a, b = b, a` is the swap idiom.",
+   "code": "first, *rest = [1, 2, 3, 4]\nprint(first, rest)\n",
+   "ts": "const [first, ...rest] = [1, 2, 3, 4]"
+  },
+  {
+   "id": "cb-w1-set-comp",
+   "type": "predict",
+   "kind": "output",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "set",
+    "comprehension"
+   ],
+   "pattern": "set comprehension",
+   "question": "What does this print?",
+   "choices": [
+    "[1, 2, 3]",
+    "[2, 2, 3, 1]",
+    "[1, 2, 2, 3]",
+    "{1, 2, 3}"
+   ],
+   "answer": 0,
+   "explanation": "Braces without a colon make a SET comprehension, so duplicate lengths collapse. sorted() returns a list.",
+   "code": "words = [\"hi\", \"yo\", \"hey\", \"a\"]\nprint(sorted({len(w) for w in words}))\n",
+   "ts": "[...new Set(words.map(w => w.length))].sort()"
+  },
+  {
+   "id": "cb-w1-is-vs-eq",
+   "type": "predict",
+   "kind": "output",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "identity",
+    "equality"
+   ],
+   "pattern": "== vs is",
+   "question": "What does this print?",
+   "choices": [
+    "True False True",
+    "False False True",
+    "True True True",
+    "False False False"
+   ],
+   "answer": 0,
+   "explanation": "== compares values (deep, for lists); `is` compares identity. Use `is` only for None/True/False singletons: `if x is None:`.",
+   "code": "a = [1, 2]\nb = [1, 2]\nprint(a == b, a is b, None is None)\n",
+   "ts": "Python == on lists is like a deep-equal; `is` is like JS ===  on objects."
+  },
+  {
+   "id": "cb-w1-str-immutable",
+   "type": "predict",
+   "kind": "output",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "strings"
+   ],
+   "pattern": "str methods",
+   "question": "What does this print?",
+   "choices": [
+    "abc aBc",
+    "ABC aBc",
+    "ABC ABC",
+    "aBc aBc"
+   ],
+   "answer": 0,
+   "explanation": "Strings are immutable: methods return a NEW string. s.upper() result is thrown away, so s is still 'abc'.",
+   "code": "s = \"abc\"\ns.upper()\nt = s.replace(\"b\", \"B\")\nprint(s, t)\n",
+   "ts": "Same in JS: s.toUpperCase() doesn't change s."
+  },
+  {
+   "id": "cb-w1-in-complexity",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "set",
+    "lists",
+    "big-o"
+   ],
+   "pattern": "in operator",
+   "question": "Time complexity of `x in my_list` vs `x in my_set` (n elements)?",
+   "choices": [
+    "list O(n), set O(1) average",
+    "both O(1)",
+    "both O(n)",
+    "list O(log n), set O(1)"
+   ],
+   "answer": 0,
+   "explanation": "`in` on a list scans every element. Sets and dicts hash the value, so lookup is O(1) on average. Convert to a set when you test membership in a loop.",
+   "ts": "array.includes(x) is O(n); set.has(x) is O(1)."
+  },
+  {
+   "id": "cb-w1-name-main",
+   "type": "predict",
+   "kind": "concept",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "modules"
+   ],
+   "pattern": "__name__ guard",
+   "question": "utils.py contains `print('A')` and then `if __name__ == \"__main__\": print('B')`. Another file does `import utils`. What prints?",
+   "choices": [
+    "Only 'A'",
+    "'A' then 'B'",
+    "Nothing",
+    "Only 'B'"
+   ],
+   "answer": 0,
+   "explanation": "When imported, the module's __name__ is 'utils', not '__main__', so the guarded block is skipped. Top-level code still runs on import."
+  },
+  {
+   "id": "cb-w1-parsons-word-freq",
+   "type": "parsons",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "dict",
+    "loops",
+    "strings"
+   ],
+   "pattern": "dict.get",
+   "title": "Most frequent word",
+   "prompt": "Arrange the lines so `most_frequent(text)` returns the most common lowercase word.",
+   "lines": [
+    "def most_frequent(text):",
+    "    counts = {}",
+    "    for word in text.lower().split():",
+    "        counts[word] = counts.get(word, 0) + 1",
+    "    return max(counts, key=counts.get)"
+   ],
+   "tests": "def test_basic():\n    assert most_frequent(\"the cat The dog the\") == \"the\", \"'the' appears 3 times\"\ndef test_single():\n    assert most_frequent(\"hi\") == \"hi\", \"single word\"\n",
+   "lesson": "`max(d, key=d.get)` returns the key with the largest value — iterating a dict yields its keys."
+  },
+  {
+   "id": "cb-w1-parsons-to-ints",
+   "type": "parsons",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "exceptions",
+    "loops"
+   ],
+   "pattern": "try/except",
+   "title": "Keep only valid ints",
+   "prompt": "Arrange the lines so `to_ints(strs)` converts each string to int and skips the invalid ones.",
+   "lines": [
+    "def to_ints(strs):",
+    "    out = []",
+    "    for s in strs:",
+    "        try:",
+    "            out.append(int(s))",
+    "        except ValueError:",
+    "            continue",
+    "    return out"
+   ],
+   "tests": "def test_mixed():\n    assert to_ints([\"1\", \"x\", \"3\"]) == [1, 3], f\"got {to_ints(['1', 'x', '3'])!r}\"\ndef test_empty():\n    assert to_ints([]) == [], \"empty in, empty out\"\n",
+   "lesson": "Keep the `try` body tiny (just the line that can fail) and catch the specific exception; `continue` skips to the next item."
+  },
+  {
+   "id": "cb-w1-bug-mutable-default",
+   "type": "bug",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 2,
+   "tags": [
+    "functions",
+    "mutability"
+   ],
+   "pattern": "mutable default arg",
+   "title": "The list that remembers",
+   "code": "def add_item(item, bucket=[]):\n    bucket.append(item)\n    return bucket\n",
+   "bugLine": 1,
+   "fixed": "def add_item(item, bucket=None):\n    bucket = [] if bucket is None else bucket\n    bucket.append(item)\n    return bucket\n",
+   "tests": "def test_fresh_each_call():\n    assert add_item(1) == [1], \"first call\"\n    assert add_item(2) == [2], \"second call should start with a fresh list, got the old one\"\ndef test_given_bucket():\n    b = [0]\n    assert add_item(1, b) == [0, 1], \"should append to the given list\"\n",
+   "choices": [
+    "Default `bucket=None` and create a new list inside when it's None",
+    "Return `bucket.copy()` instead of `bucket`",
+    "Use `bucket += [item]` instead of append",
+    "Move `bucket=[]` to the first line of the body and keep the default"
+   ],
+   "answer": 0,
+   "explanation": "Default values are evaluated ONCE, when `def` runs, so every call shares the same list. Use `None` as the default and build a new list inside."
+  },
+  {
+   "id": "cb-w1-bug-sort-none",
+   "type": "bug",
+   "stage": "week1",
+   "week": 1,
+   "difficulty": 1,
+   "tags": [
+    "sorting",
+    "lists"
+   ],
+   "pattern": "sort vs sorted",
+   "title": "Top three scores",
+   "code": "def top3(scores):\n    ranked = scores.sort(reverse=True)\n    return ranked[:3]\n",
+   "bugLine": 2,
+   "fixed": "def top3(scores):\n    ranked = sorted(scores, reverse=True)\n    return ranked[:3]\n",
+   "tests": "def test_top3():\n    assert top3([5, 1, 9, 7, 3]) == [9, 7, 5], f\"got {top3([5, 1, 9, 7, 3])!r}\"\ndef test_no_mutation():\n    s = [2, 1, 3]\n    top3(s)\n    assert s == [2, 1, 3], \"don't reorder the caller's list\"\n",
+   "choices": [
+    "Use `sorted(scores, reverse=True)` — `list.sort()` sorts in place and returns None",
+    "Change the slice to `ranked[-3:]`",
+    "Use `scores.sort(reversed=True)`",
+    "Wrap it: `list(scores.sort(reverse=True))`"
+   ],
+   "answer": 0,
+   "explanation": "`list.sort()` mutates and returns `None` (unlike JS `arr.sort()`, which returns the array). `sorted(xs)` returns a new list and leaves the input alone."
   }
  ]
 }

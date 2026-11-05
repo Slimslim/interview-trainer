@@ -1,0 +1,1134 @@
+{
+ "version": "1.0.0",
+ "items": [
+  {
+   "id": "fde-pr-dict-order",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "dict"
+   ],
+   "pattern": "dict insertion order",
+   "code": "d = {\"b\": 1, \"a\": 2}\nd[\"c\"] = 3\ndel d[\"b\"]\nd[\"b\"] = 4\nprint(list(d))\n",
+   "question": "What does this print?",
+   "choices": [
+    "['b', 'a', 'c']",
+    "['a', 'b', 'c']",
+    "['c', 'a', 'b']",
+    "['a', 'c', 'b']"
+   ],
+   "answer": 3,
+   "explanation": "Dicts keep insertion order. Deleting 'b' and re-adding it puts it at the end; updating an existing key would not move it.",
+   "ts": "A JS Map also keeps insertion order; plain objects put integer-like keys first."
+  },
+  {
+   "id": "fde-pr-default-mutable",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "functions",
+    "gotcha"
+   ],
+   "pattern": "mutable default argument",
+   "code": "def add(x, acc=[]):\n    acc.append(x)\n    return acc\n\nadd(1)\nprint(add(2))\n",
+   "question": "What does this print?",
+   "choices": [
+    "[1, 2]",
+    "[2]",
+    "[1]",
+    "TypeError"
+   ],
+   "answer": 0,
+   "explanation": "Default values are evaluated once, at def time. Every call without `acc` shares the same list. Use `acc=None` and create the list inside.",
+   "ts": "JS evaluates default parameters on every call, so this gotcha doesn't exist there."
+  },
+  {
+   "id": "fde-pr-late-binding",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "closures",
+    "lambda"
+   ],
+   "pattern": "closure late binding",
+   "code": "fs = [lambda: i for i in range(3)]\nprint([f() for f in fs])\n",
+   "question": "What does this print?",
+   "choices": [
+    "NameError",
+    "[2, 2, 2]",
+    "[0, 1, 2]",
+    "[0, 0, 0]"
+   ],
+   "answer": 1,
+   "explanation": "Closures capture the variable, not its value. All lambdas read `i` after the loop ends (2). Fix: `lambda i=i: i`.",
+   "ts": "In JS, `for (let i...)` creates a fresh binding per iteration, giving [0, 1, 2]."
+  },
+  {
+   "id": "fde-pr-gen-exhaust",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "generators"
+   ],
+   "pattern": "generator exhaustion",
+   "code": "g = (x * x for x in range(3))\nprint(sum(g), sum(g))\n",
+   "question": "What does this print?",
+   "choices": [
+    "0 5",
+    "14 0",
+    "5 0",
+    "5 5"
+   ],
+   "answer": 2,
+   "explanation": "A generator can be iterated once. The first sum consumes 0+1+4 = 5; the second sees nothing and returns 0. Use a list if you need two passes."
+  },
+  {
+   "id": "fde-pr-slice-step",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "slicing",
+    "lists"
+   ],
+   "pattern": "slicing",
+   "code": "a = [0, 1, 2, 3, 4, 5]\nprint(a[1:5:2], a[-2:])\n",
+   "question": "What does this print?",
+   "choices": [
+    "[1, 3, 5] [4, 5]",
+    "[1, 3] [5]",
+    "[2, 4] [4, 5]",
+    "[1, 3] [4, 5]"
+   ],
+   "answer": 3,
+   "explanation": "Stop is exclusive: indices 1 and 3 from [1:5:2]. a[-2:] is the last two items."
+  },
+  {
+   "id": "fde-pr-sort-key-tuple",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "sorting",
+    "lambda"
+   ],
+   "pattern": "sorted with tuple key",
+   "code": "words = [\"bb\", \"a\", \"ccc\", \"dd\"]\nprint(sorted(words, key=lambda w: (-len(w), w)))\n",
+   "question": "What does this print?",
+   "choices": [
+    "['ccc', 'bb', 'dd', 'a']",
+    "['ccc', 'dd', 'bb', 'a']",
+    "['a', 'bb', 'dd', 'ccc']",
+    "['bb', 'dd', 'ccc', 'a']"
+   ],
+   "answer": 0,
+   "explanation": "Tuples compare element by element: longest first (negated length), then alphabetical to break ties.",
+   "ts": "JS: words.sort((a, b) => b.length - a.length || a.localeCompare(b))."
+  },
+  {
+   "id": "fde-pr-counter-ties",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "counter",
+    "hashing"
+   ],
+   "pattern": "Counter.most_common ties",
+   "code": "from collections import Counter\nc = Counter([\"y\", \"x\", \"x\", \"y\", \"z\"])\nprint(c.most_common(1))\n",
+   "question": "What does this print?",
+   "choices": [
+    "('y', 2)",
+    "[('y', 2)]",
+    "[('x', 2)]",
+    "[('x', 2), ('y', 2)]"
+   ],
+   "answer": 1,
+   "explanation": "most_common sorts by count with a stable sort, so ties keep first-seen order. 'y' was seen first. It returns a list of (item, count) tuples."
+  },
+  {
+   "id": "fde-pr-defaultdict-read",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "defaultdict",
+    "dict"
+   ],
+   "pattern": "defaultdict",
+   "code": "from collections import defaultdict\ndd = defaultdict(int)\ndd[\"a\"] += 1\nif dd[\"b\"] == 0:\n    pass\nprint(dict(dd))\n",
+   "question": "What does this print?",
+   "choices": [
+    "KeyError",
+    "{'a': 1, 'b': None}",
+    "{'a': 1, 'b': 0}",
+    "{'a': 1}"
+   ],
+   "answer": 2,
+   "explanation": "Reading a missing key with [] on a defaultdict inserts the default. Use `'b' in dd` or dd.get('b') to check without inserting."
+  },
+  {
+   "id": "fde-pr-is-vs-eq",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "is",
+    "equality"
+   ],
+   "pattern": "identity vs equality",
+   "code": "a = [1, 2]\nb = [1, 2]\nc = a\nprint(a == b, a is b, a is c)\n",
+   "question": "What does this print?",
+   "choices": [
+    "True True True",
+    "False False True",
+    "True False False",
+    "True False True"
+   ],
+   "answer": 3,
+   "explanation": "`==` compares values; `is` compares identity. b is a separate list; c is the same object as a. Use `is` only for None and sentinels.",
+   "ts": "JS `===` on objects is identity, like Python's `is`."
+  },
+  {
+   "id": "fde-pr-floor-div",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "math",
+    "division"
+   ],
+   "pattern": "integer division",
+   "code": "print(-7 // 2, -7 % 2, int(-7 / 2))\n",
+   "question": "What does this print?",
+   "choices": [
+    "-4 1 -3",
+    "-3 -1 -3",
+    "-4 -1 -4",
+    "-3 1 -3"
+   ],
+   "answer": 0,
+   "explanation": "// floors toward negative infinity (-4), and % takes the sign of the divisor (1). int() truncates toward zero (-3).",
+   "ts": "JS: Math.floor(-7 / 2) is -4, but -7 % 2 is -1 (sign of the dividend)."
+  },
+  {
+   "id": "fde-pr-fstring-spec",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "f-strings",
+    "strings"
+   ],
+   "pattern": "f-string format spec",
+   "code": "x = 3.14159\nn = 42\nprint(f\"{x:.2f}|{n:05d}|{n:>4}|\")\n",
+   "question": "What does this print?",
+   "choices": [
+    "3.14|00042|42|",
+    "3.14|00042|  42|",
+    "3.14|42000|42  |",
+    "3.1|00042|  42|"
+   ],
+   "answer": 1,
+   "explanation": ".2f rounds to two decimals, 05d zero-pads to width 5, >4 right-aligns in width 4.",
+   "ts": "JS: x.toFixed(2), String(n).padStart(5, '0'), String(n).padStart(4)."
+  },
+  {
+   "id": "fde-pr-grid-alias",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "lists",
+    "aliasing",
+    "gotcha"
+   ],
+   "pattern": "list aliasing",
+   "code": "grid = [[0] * 2] * 2\ngrid[0][0] = 1\nprint(grid)\n",
+   "question": "What does this print?",
+   "choices": [
+    "[[1, 1], [0, 0]]",
+    "[[1, 1], [1, 1]]",
+    "[[1, 0], [1, 0]]",
+    "[[1, 0], [0, 0]]"
+   ],
+   "answer": 2,
+   "explanation": "`* 2` on the outer list copies the reference, so both rows are the same list. Use `[[0] * 2 for _ in range(2)]`.",
+   "ts": "JS has the same trap: Array(2).fill([0, 0]) shares one inner array."
+  },
+  {
+   "id": "fde-pr-set-ops",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "sets"
+   ],
+   "pattern": "set operations",
+   "code": "a = {1, 2, 3}\nb = {2, 3, 4}\nprint(sorted(a - b), sorted(a ^ b), sorted(a & b))\n",
+   "question": "What does this print?",
+   "choices": [
+    "[1, 4] [1] [2, 3]",
+    "[1] [2, 3] [1, 4]",
+    "[4] [1, 4] [2, 3]",
+    "[1] [1, 4] [2, 3]"
+   ],
+   "answer": 3,
+   "explanation": "- is difference (in a, not b), ^ is symmetric difference (in exactly one), & is intersection."
+  },
+  {
+   "id": "fde-pr-zip-shortest",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "zip",
+    "iteration"
+   ],
+   "pattern": "zip stops at shortest",
+   "code": "print(list(zip(\"ab\", [1, 2, 3])))\n",
+   "question": "What does this print?",
+   "choices": [
+    "[('a', 1), ('b', 2)]",
+    "[('a', 1), ('b', 2), (None, 3)]",
+    "ValueError",
+    "[('ab', 1)]"
+   ],
+   "answer": 0,
+   "explanation": "zip stops at the shortest input and silently drops the rest. Use zip(..., strict=True) (3.10+) to raise, or itertools.zip_longest to pad."
+  },
+  {
+   "id": "fde-pr-enumerate-start",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "enumerate",
+    "iteration"
+   ],
+   "pattern": "enumerate start",
+   "code": "for i, c in enumerate(\"ab\", start=1):\n    print(i, c, end=\"; \")\n",
+   "question": "What does this print?",
+   "choices": [
+    "a 1; b 2;",
+    "1 a; 2 b;",
+    "0 a; 1 b;",
+    "1 a; 2 b; 3"
+   ],
+   "answer": 1,
+   "explanation": "start=1 changes only the counter; the items are unchanged. Handy for 1-based line numbers."
+  },
+  {
+   "id": "fde-pr-finally-return",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "exceptions",
+    "gotcha"
+   ],
+   "pattern": "try/finally return",
+   "code": "def f():\n    try:\n        return \"try\"\n    finally:\n        return \"finally\"\n\nprint(f())\n",
+   "question": "What does this print?",
+   "choices": [
+    "try finally",
+    "SyntaxError",
+    "finally",
+    "try"
+   ],
+   "answer": 2,
+   "explanation": "finally always runs, and a return inside it overrides the pending return (it also swallows exceptions). Avoid return in finally; newer Pythons warn about it."
+  },
+  {
+   "id": "fde-pr-json-tuple",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "json"
+   ],
+   "pattern": "json.dumps types",
+   "code": "import json\nprint(json.dumps({\"k\": (1, 2), \"ok\": True, \"n\": None}))\n",
+   "question": "What does this print?",
+   "choices": [
+    "{'k': (1, 2), 'ok': True, 'n': None}",
+    "{\"k\": (1, 2), \"ok\": true, \"n\": null}",
+    "TypeError",
+    "{\"k\": [1, 2], \"ok\": true, \"n\": null}"
+   ],
+   "answer": 3,
+   "explanation": "JSON has no tuple, so tuples become arrays. True/None become true/null, and keys use double quotes. A set would raise TypeError.",
+   "ts": "JSON.stringify behaves the same for arrays, true and null."
+  },
+  {
+   "id": "fde-pr-any-all-empty",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "builtins",
+    "logic"
+   ],
+   "pattern": "any/all on empty",
+   "code": "print(all([]), any([]))\n",
+   "question": "What does this print?",
+   "choices": [
+    "True False",
+    "False False",
+    "False True",
+    "True True"
+   ],
+   "answer": 0,
+   "explanation": "all() of nothing is vacuously True; any() of nothing is False. Watch for this when validating an empty batch.",
+   "ts": "JS: [].every(f) is true, [].some(f) is false."
+  },
+  {
+   "id": "fde-pr-split-strip",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "strings"
+   ],
+   "pattern": "string methods",
+   "code": "print(\"a,b,,c\".split(\",\"), \" Hi \".strip().lower())\n",
+   "question": "What does this print?",
+   "choices": [
+    "['a,b,,c'] hi",
+    "['a', 'b', '', 'c'] hi",
+    "['a', 'b', 'c'] hi",
+    "['a', 'b', '', 'c'] Hi"
+   ],
+   "answer": 1,
+   "explanation": "split with an explicit separator keeps empty fields. Only split() with no argument collapses runs of whitespace."
+  },
+  {
+   "id": "fde-pr-star-unpack",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "unpacking"
+   ],
+   "pattern": "extended unpacking",
+   "code": "first, *rest = [1, 2, 3]\n*init, last = \"abc\"\nprint(rest, init, last)\n",
+   "question": "What does this print?",
+   "choices": [
+    "[2, 3] ab c",
+    "[2, 3] ['a', 'b'] ['c']",
+    "[2, 3] ['a', 'b'] c",
+    "(2, 3) ('a', 'b') c"
+   ],
+   "answer": 2,
+   "explanation": "A starred target always collects a list, even from a string. The plain targets get single items.",
+   "ts": "JS: const [first, ...rest] = [1, 2, 3]; rest must come last in JS."
+  },
+  {
+   "id": "fde-pr-heap-root",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "heap",
+    "heapq"
+   ],
+   "pattern": "heapq is a min-heap",
+   "code": "import heapq\nh = []\nfor x in [5, 1, 4, 2]:\n    heapq.heappush(h, x)\nprint(heapq.heappop(h), h[0])\n",
+   "question": "What does this print?",
+   "choices": [
+    "5 4",
+    "1 4",
+    "1 5",
+    "1 2"
+   ],
+   "answer": 3,
+   "explanation": "heapq is a min-heap: pop returns the smallest, and h[0] is always the next smallest. For a max-heap push -x."
+  },
+  {
+   "id": "fde-pr-heap-tuples",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "heap",
+    "heapq",
+    "tuples"
+   ],
+   "pattern": "heap of tuples",
+   "code": "import heapq\nh = []\nfor item in [(2, \"b\"), (1, \"z\"), (1, \"a\")]:\n    heapq.heappush(h, item)\nprint([heapq.heappop(h)[1] for _ in range(3)])\n",
+   "question": "What does this print?",
+   "choices": [
+    "['a', 'z', 'b']",
+    "['z', 'a', 'b']",
+    "['b', 'z', 'a']",
+    "['a', 'b', 'z']"
+   ],
+   "answer": 0,
+   "explanation": "Tuples compare by priority first, then by the next field to break ties. Add a counter as the second field when payloads aren't comparable."
+  },
+  {
+   "id": "fde-pr-comp-scope",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "comprehensions",
+    "scope"
+   ],
+   "pattern": "comprehension scope",
+   "code": "x = \"outer\"\nys = [x for x in range(3)]\nprint(x)\n",
+   "question": "What does this print?",
+   "choices": [
+    "NameError",
+    "outer",
+    "2",
+    "[0, 1, 2]"
+   ],
+   "answer": 1,
+   "explanation": "In Python 3 a comprehension has its own scope, so its loop variable doesn't leak. A plain for loop would rebind x to 2."
+  },
+  {
+   "id": "fde-pr-get-vs-index",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "dict",
+    "exceptions"
+   ],
+   "pattern": "dict.get vs indexing",
+   "code": "d = {\"a\": 1}\nprint(d.get(\"b\", 0))\nprint(d[\"b\"])\n",
+   "question": "What does this print?",
+   "choices": [
+    "0 then 0",
+    "None then KeyError",
+    "0, then KeyError",
+    "0 then None"
+   ],
+   "answer": 2,
+   "explanation": "get returns the default (0) without raising. Indexing a missing key raises KeyError.",
+   "ts": "JS returns undefined for a missing key instead of throwing."
+  },
+  {
+   "id": "fde-pr-mutate-while-iter",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "dict",
+    "exceptions",
+    "gotcha"
+   ],
+   "pattern": "mutating during iteration",
+   "code": "d = {\"a\": 1, \"b\": 2}\nfor k in d:\n    if k == \"a\":\n        d[\"c\"] = 3\nprint(d)\n",
+   "question": "What does this print?",
+   "choices": [
+    "{'a': 1, 'b': 2, 'c': 3}",
+    "{'a': 1, 'b': 2}",
+    "KeyError",
+    "RuntimeError"
+   ],
+   "answer": 3,
+   "explanation": "Adding or removing keys while iterating a dict raises RuntimeError (dictionary changed size during iteration). Iterate over list(d) instead."
+  },
+  {
+   "id": "fde-pr-sort-returns-none",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "sorting",
+    "lists"
+   ],
+   "pattern": "list.sort returns None",
+   "code": "a = [3, 1, 2]\nb = a.sort()\nprint(b, a)\n",
+   "question": "What does this print?",
+   "choices": [
+    "None [1, 2, 3]",
+    "[1, 2, 3] [1, 2, 3]",
+    "[1, 2, 3] [3, 1, 2]",
+    "None [3, 1, 2]"
+   ],
+   "answer": 0,
+   "explanation": "list.sort() sorts in place and returns None. sorted(a) returns a new list.",
+   "ts": "JS arr.sort() sorts in place and also returns the array (and sorts lexicographically by default)."
+  },
+  {
+   "id": "fde-pr-round-bankers",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "math",
+    "rounding"
+   ],
+   "pattern": "round half to even",
+   "code": "print(round(2.5), round(3.5), round(0.125, 2))\n",
+   "question": "What does this print?",
+   "choices": [
+    "3 4 0.12",
+    "2 4 0.12",
+    "3 4 0.13",
+    "2 3 0.12"
+   ],
+   "answer": 1,
+   "explanation": "round() uses banker's rounding: halves go to the even neighbour. 0.125 is exact in binary, so it rounds to even, 0.12. Use Decimal for money.",
+   "ts": "JS Math.round(2.5) is 3 (rounds half up)."
+  },
+  {
+   "id": "fde-pr-join-ints",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "strings",
+    "exceptions"
+   ],
+   "pattern": "str.join needs strings",
+   "code": "ids = [1, 2, 3]\nprint(\", \".join(ids))\n",
+   "question": "What does this print?",
+   "choices": [
+    "[1, 2, 3]",
+    "123",
+    "TypeError",
+    "1, 2, 3"
+   ],
+   "answer": 2,
+   "explanation": "join requires strings and raises TypeError on ints. Use ', '.join(map(str, ids)).",
+   "ts": "JS [1, 2, 3].join(', ') converts numbers for you."
+  },
+  {
+   "id": "fde-pr-shallow-copy",
+   "type": "predict",
+   "kind": "output",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "lists",
+    "aliasing",
+    "copy"
+   ],
+   "pattern": "shallow copy",
+   "code": "a = [[1], [2]]\nb = a.copy()\nb[0].append(9)\nb.append([3])\nprint(a)\n",
+   "question": "What does this print?",
+   "choices": [
+    "[[1], [2]]",
+    "[[1, 9], [2], [3]]",
+    "[[1], [2], [3]]",
+    "[[1, 9], [2]]"
+   ],
+   "answer": 3,
+   "explanation": "copy() is shallow: a new outer list holding the same inner lists. Mutating an inner list shows through; appending to b doesn't. Use copy.deepcopy for nested data.",
+   "ts": "JS spread [...a] is also shallow; use structuredClone(a) for a deep copy."
+  },
+  {
+   "id": "fde-pr-cx-set-membership",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "sets",
+    "hashing",
+    "big-o"
+   ],
+   "pattern": "set membership is O(1)",
+   "code": "seen = set()\nfor x in items:          # n items\n    if x in seen:\n        return True\n    seen.add(x)\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n)",
+    "O(n^2)",
+    "O(n log n)",
+    "O(1)"
+   ],
+   "answer": 0,
+   "explanation": "Set lookups and inserts are O(1) on average, so one pass costs O(n)."
+  },
+  {
+   "id": "fde-pr-cx-list-membership",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "lists",
+    "hashing",
+    "big-o"
+   ],
+   "pattern": "list membership is O(n)",
+   "code": "common = []\nfor x in a:              # n items\n    if x in b:           # b is a list of m items\n        common.append(x)\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n log m)",
+    "O(n * m)",
+    "O(n + m)",
+    "O(n)"
+   ],
+   "answer": 1,
+   "explanation": "`in` on a list scans it: O(m) each time. Convert b to a set first for O(n + m)."
+  },
+  {
+   "id": "fde-pr-cx-sort-then-scan",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "sorting",
+    "big-o"
+   ],
+   "pattern": "sorting dominates",
+   "code": "a.sort()                 # n items\nfor i in range(1, len(a)):\n    if a[i] == a[i - 1]:\n        return True\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n^2)",
+    "O(log n)",
+    "O(n log n)",
+    "O(n)"
+   ],
+   "answer": 2,
+   "explanation": "Sorting is O(n log n); the linear scan afterwards doesn't change the total."
+  },
+  {
+   "id": "fde-pr-cx-heap-topk",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "heap",
+    "top-k",
+    "big-o"
+   ],
+   "pattern": "top-k with a size-k heap",
+   "code": "import heapq\nh = []\nfor x in nums:           # n items\n    heapq.heappush(h, x)\n    if len(h) > k:\n        heapq.heappop(h)\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n log n)",
+    "O(n * k)",
+    "O(k log n)",
+    "O(n log k)"
+   ],
+   "answer": 3,
+   "explanation": "The heap never exceeds k + 1 items, so each push/pop is O(log k). heapq.nlargest does the same."
+  },
+  {
+   "id": "fde-pr-cx-pairs",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "loops",
+    "big-o"
+   ],
+   "pattern": "nested loops over pairs",
+   "code": "for i in range(n):\n    for j in range(i + 1, n):\n        if a[i] + a[j] == target:\n            return (i, j)\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n^2)",
+    "O(n log n)",
+    "O(n)",
+    "O(2^n)"
+   ],
+   "answer": 0,
+   "explanation": "n(n-1)/2 pairs is still O(n^2). A dict of seen values (two-sum) solves it in O(n)."
+  },
+  {
+   "id": "fde-pr-cx-bisect-queries",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "bisect",
+    "binary-search",
+    "big-o"
+   ],
+   "pattern": "binary search per query",
+   "code": "from bisect import bisect_left\n# arr is sorted, length n; queries has q items\nout = [bisect_left(arr, x) for x in queries]\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(q + n)",
+    "O(q log n)",
+    "O(q * n)",
+    "O(n log q)"
+   ],
+   "answer": 1,
+   "explanation": "Each bisect is O(log n) on the sorted array, done q times."
+  },
+  {
+   "id": "fde-pr-cx-pop0",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "lists",
+    "deque",
+    "queue",
+    "big-o"
+   ],
+   "pattern": "list.pop(0) is O(n)",
+   "code": "q = list(range(n))\nwhile q:\n    x = q.pop(0)\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n log n)",
+    "O(1)",
+    "O(n^2)",
+    "O(n)"
+   ],
+   "answer": 2,
+   "explanation": "pop(0) shifts every remaining item: O(n) each, O(n^2) total. collections.deque.popleft() is O(1), making the loop O(n).",
+   "ts": "JS arr.shift() has the same linear cost in general."
+  },
+  {
+   "id": "fde-pr-cx-deque",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "deque",
+    "queue",
+    "bfs",
+    "big-o"
+   ],
+   "pattern": "deque popleft is O(1)",
+   "code": "from collections import deque\nq = deque(range(n))\nwhile q:\n    x = q.popleft()\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n^2)",
+    "O(n log n)",
+    "O(log n)",
+    "O(n)"
+   ],
+   "answer": 3,
+   "explanation": "deque supports O(1) appends and pops at both ends. Use it for every BFS queue."
+  },
+  {
+   "id": "fde-pr-cx-str-concat",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "strings",
+    "big-o"
+   ],
+   "pattern": "string concatenation in a loop",
+   "code": "s = \"\"\nfor part in parts:       # n parts\n    s = s + part\n",
+   "question": "What is the time complexity (total characters ~ n)?",
+   "choices": [
+    "O(n^2) worst case; use ''.join(parts) for O(n)",
+    "O(n) always",
+    "O(n log n)",
+    "O(1) per step, so O(n) guaranteed"
+   ],
+   "answer": 0,
+   "explanation": "Strings are immutable, so each + can copy everything so far. CPython sometimes optimizes this in place, but it isn't guaranteed. ''.join is reliably linear."
+  },
+  {
+   "id": "fde-pr-cx-fib-naive",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "recursion",
+    "big-o"
+   ],
+   "pattern": "exponential recursion",
+   "code": "def fib(n):\n    if n < 2:\n        return n\n    return fib(n - 1) + fib(n - 2)\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n log n)",
+    "O(2^n)",
+    "O(n)",
+    "O(n^2)"
+   ],
+   "answer": 1,
+   "explanation": "Each call branches twice and recomputes the same subproblems: exponential (about 1.6^n, bounded by O(2^n))."
+  },
+  {
+   "id": "fde-pr-cx-fib-memo",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "recursion",
+    "memoization",
+    "dp",
+    "big-o"
+   ],
+   "pattern": "recursion with memo",
+   "code": "from functools import cache\n\n@cache\ndef fib(n):\n    if n < 2:\n        return n\n    return fib(n - 1) + fib(n - 2)\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n log n)",
+    "O(1)",
+    "O(n)",
+    "O(2^n)"
+   ],
+   "answer": 2,
+   "explanation": "With memoization each fib(k) is computed once and later calls are O(1) cache hits, so the total is O(n) time and O(n) space."
+  },
+  {
+   "id": "fde-pr-cx-halving",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "binary-search",
+    "loops",
+    "big-o"
+   ],
+   "pattern": "halving loop is O(log n)",
+   "code": "lo, hi = 0, n\nwhile lo < hi:\n    mid = (lo + hi) // 2\n    if ok(mid):\n        hi = mid\n    else:\n        lo = mid + 1\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n) calls to ok",
+    "O(n log n)",
+    "O(sqrt n)",
+    "O(log n) calls to ok"
+   ],
+   "answer": 3,
+   "explanation": "The range halves each iteration, so it takes about log2(n) steps."
+  },
+  {
+   "id": "fde-pr-cx-index-then-lookup",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "dict",
+    "hashing",
+    "big-o"
+   ],
+   "pattern": "build index once",
+   "code": "by_id = {u[\"id\"]: u for u in users}     # n users\nfor order in orders:                     # m orders\n    order[\"user\"] = by_id[order[\"user_id\"]]\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(n + m)",
+    "O(n * m)",
+    "O(m log n)",
+    "O(n^2)"
+   ],
+   "answer": 0,
+   "explanation": "Building the dict is O(n), and each lookup is O(1) on average. This is the standard fix for an n*m nested join."
+  },
+  {
+   "id": "fde-pr-cx-dedupe-slice",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "lists",
+    "slicing",
+    "big-o"
+   ],
+   "pattern": "hidden O(n) inside a loop",
+   "code": "out = [x for i, x in enumerate(a) if x not in a[:i]]   # n items\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(1)",
+    "O(n^2)",
+    "O(n)",
+    "O(n log n)"
+   ],
+   "answer": 1,
+   "explanation": "a[:i] copies i items and `not in` scans them, inside an n-step loop. list(dict.fromkeys(a)) dedupes in O(n) and keeps order."
+  },
+  {
+   "id": "fde-pr-cx-bfs",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "bfs",
+    "graphs",
+    "big-o"
+   ],
+   "pattern": "BFS is O(V + E)",
+   "code": "from collections import deque\nseen, q = {start}, deque([start])\nwhile q:\n    node = q.popleft()\n    for nb in graph[node]:      # adjacency lists\n        if nb not in seen:\n            seen.add(nb)\n            q.append(nb)\n",
+   "question": "What is the time complexity?",
+   "choices": [
+    "O(V^2)",
+    "O(E log V)",
+    "O(V + E)",
+    "O(V * E)"
+   ],
+   "answer": 2,
+   "explanation": "Each node is dequeued once and each edge is checked once (twice if undirected)."
+  },
+  {
+   "id": "fde-pr-cx-ordereddict-lru",
+   "type": "predict",
+   "kind": "complexity",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "lru",
+    "ordereddict",
+    "caching",
+    "big-o"
+   ],
+   "pattern": "LRU ops are O(1)",
+   "code": "from collections import OrderedDict\ncache = OrderedDict()\ndef get(k):\n    if k not in cache:\n        return None\n    cache.move_to_end(k)\n    return cache[k]\n",
+   "question": "What is the time complexity of get?",
+   "choices": [
+    "O(n) per call",
+    "O(log n) per call",
+    "O(n) amortized",
+    "O(1) per call"
+   ],
+   "answer": 3,
+   "explanation": "OrderedDict is a hash map plus a doubly linked list, so lookup, move_to_end and popitem(last=False) are all O(1)."
+  },
+  {
+   "id": "fde-pr-stop-tool-use",
+   "type": "predict",
+   "kind": "concept",
+   "stage": "design",
+   "difficulty": 1,
+   "tags": [
+    "claude-api",
+    "tool-use",
+    "stop-reason"
+   ],
+   "pattern": "tool use loop",
+   "question": "A Messages API response comes back with stop_reason \"tool_use\". What should your code do next?",
+   "choices": [
+    "Run the requested tool(s), send the results back as tool_result blocks in a new user message, and call the API again",
+    "Show the response to the user; the turn is finished",
+    "Retry the same request, because the output was cut off",
+    "Raise an error, because the model refused"
+   ],
+   "answer": 0,
+   "explanation": "tool_use means Claude is asking for a tool call. Your loop executes it and returns a tool_result matched by tool_use_id, repeating until stop_reason is end_turn."
+  },
+  {
+   "id": "fde-pr-stop-max-tokens",
+   "type": "predict",
+   "kind": "concept",
+   "stage": "design",
+   "difficulty": 1,
+   "tags": [
+    "claude-api",
+    "stop-reason"
+   ],
+   "pattern": "stop reasons",
+   "question": "stop_reason is \"max_tokens\". What happened?",
+   "choices": [
+    "A stop sequence you provided was generated",
+    "The output hit the max_tokens limit you set and is probably truncated",
+    "The model finished its answer naturally",
+    "The prompt exceeded the context window"
+   ],
+   "answer": 1,
+   "explanation": "max_tokens means generation was cut off at your limit. Raise the limit or continue the response. A natural finish is end_turn, and a matched stop sequence is stop_sequence."
+  },
+  {
+   "id": "fde-pr-prompt-caching",
+   "type": "predict",
+   "kind": "concept",
+   "stage": "design",
+   "difficulty": 2,
+   "tags": [
+    "claude-api",
+    "caching",
+    "cost"
+   ],
+   "pattern": "prompt caching",
+   "question": "What does prompt caching save you?",
+   "choices": [
+    "Nothing unless temperature is 0",
+    "Rate-limit errors, because cached requests skip the API",
+    "Cost and latency on a repeated, identical prompt prefix (e.g. a long system prompt or document), because cached reads are billed far below normal input",
+    "Output tokens, because responses are reused for identical questions"
+   ],
+   "answer": 2,
+   "explanation": "Caching stores the processed prefix up to a cache_control breakpoint. Later requests with the exact same prefix read it cheaply and faster. Responses are never cached, and any change before the breakpoint misses the cache."
+  },
+  {
+   "id": "fde-pr-batches",
+   "type": "predict",
+   "kind": "concept",
+   "stage": "design",
+   "difficulty": 1,
+   "tags": [
+    "claude-api",
+    "batches",
+    "cost"
+   ],
+   "pattern": "batch vs real-time",
+   "question": "When is the Message Batches API the right call?",
+   "choices": [
+    "A chat UI that needs streaming tokens",
+    "An agent loop where each step depends on the previous tool result",
+    "Any request over 1,000 tokens",
+    "Large, non-urgent jobs (nightly classification, eval runs, backfills) where about 50% lower cost matters more than latency"
+   ],
+   "answer": 3,
+   "explanation": "Batches are asynchronous, at about half the cost, with results within 24 hours (often much sooner). Interactive or step-dependent work belongs on the regular Messages API."
+  },
+  {
+   "id": "fde-pr-cache-prefix-order",
+   "type": "predict",
+   "kind": "concept",
+   "stage": "design",
+   "difficulty": 2,
+   "tags": [
+    "claude-api",
+    "caching"
+   ],
+   "pattern": "prompt caching",
+   "question": "Your system prompt starts with today's timestamp, followed by a 20k-token policy document marked for caching. Why is the cache hit rate near zero?",
+   "choices": [
+    "The cache matches on an exact prefix, and the timestamp changes it on every request; move variable content after the cached block",
+    "Caching only works on user messages",
+    "Documents over 10k tokens can't be cached",
+    "Cache hits require streaming to be enabled"
+   ],
+   "answer": 0,
+   "explanation": "Put stable content first (tools, system, long documents) and per-request content last. Anything that changes before the breakpoint invalidates the cached prefix."
+  }
+ ]
+}

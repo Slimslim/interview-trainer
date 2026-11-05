@@ -219,7 +219,7 @@ def research_check(research_files):
                         err(f"{rel}:{n}", f"cites undefined source {r_}")
 
 
-def load_packs(only=None):
+def load_packs(only=None, files=None):
     index = load_json(ROOT / "packs/index.json") or {"packs": []}
     packs = []
     for pid in index["packs"]:
@@ -232,6 +232,8 @@ def load_packs(only=None):
         docs = {f"packs/{pid}/pack.json": manifest}
         items = []
         for f in manifest.get("files", []):
+            if files and f not in files:
+                continue
             doc = load_json(pdir / f)
             if doc is None:
                 continue
@@ -245,9 +247,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pack", action="append")
     ap.add_argument("--no-exec", action="store_true")
+    ap.add_argument("--file", action="append",
+                    help="only check items from this file (e.g. bugs.json); others may be missing")
     args = ap.parse_args()
 
-    packs, index = load_packs(args.pack)
+    packs, index = load_packs(args.pack, args.file)
     schema_check(packs)
     structure_check(packs)
     research = []
@@ -262,7 +266,8 @@ def main():
 
     jobs = collect_jobs(packs)
     (ROOT / "reports").mkdir(exist_ok=True)
-    (ROOT / "reports/jobs.json").write_text(json.dumps(jobs))
+    if not args.file:
+        (ROOT / "reports/jobs.json").write_text(json.dumps(jobs))
     if not args.no_exec:
         with ThreadPoolExecutor(max_workers=os.cpu_count() or 4) as ex:
             for job, msg in zip(jobs, ex.map(run_job, jobs)):

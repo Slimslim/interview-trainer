@@ -1,0 +1,333 @@
+{
+ "version": "1.0.0",
+ "items": [
+  {
+   "id": "aia-fc-discovery-structure",
+   "type": "flashcard",
+   "stage": "customer",
+   "difficulty": 1,
+   "tags": [
+    "discovery"
+   ],
+   "pattern": "Discovery structure",
+   "front": "What are the steps of a discovery call for an enterprise Claude deployment?",
+   "back": "1) Agenda & roles  2) Business context & KPIs  3) Current process & quantified pain  4) Data: sources, sensitivity, residency, access  5) Constraints: security, compliance (ZDR, region), procurement, integration  6) Success criteria & who owns the eval set  7) Stakeholders & decision process  8) Scoped pilot & next steps, then a written recap.",
+   "source": "S13"
+  },
+  {
+   "id": "aia-fc-play-back",
+   "type": "flashcard",
+   "stage": "customer",
+   "difficulty": 1,
+   "tags": [
+    "discovery"
+   ],
+   "pattern": "Play back before proposing",
+   "front": "Before proposing a solution in discovery, what should you do?",
+   "back": "Play back what you heard in the customer's words (goal, pain, constraints, success metric) and check it's right. Then propose a narrow pilot with an eval set built from their real examples.",
+   "source": "S13"
+  },
+  {
+   "id": "aia-fc-zdr-objection",
+   "type": "flashcard",
+   "stage": "customer",
+   "difficulty": 2,
+   "tags": [
+    "zdr",
+    "residency",
+    "security"
+   ],
+   "pattern": "Data-retention objection",
+   "front": "Customer: \"Our data can't leave the EU and we need zero data retention.\" What do you cover?",
+   "back": "Clarify the actual requirement (law, policy, or preference). Walk through the API data-retention / ZDR options, and deploying via cloud platforms (Bedrock, Google Cloud, Microsoft Foundry, Claude Platform on AWS) in their region. Confirm exact terms in writing; don't improvise.",
+   "source": "D2"
+  },
+  {
+   "id": "aia-fc-workflow-vs-agent",
+   "type": "flashcard",
+   "stage": "design",
+   "difficulty": 1,
+   "tags": [
+    "agents",
+    "architecture"
+   ],
+   "pattern": "Workflow vs agent",
+   "front": "Workflow vs agent: what's the difference, and which do you start with?",
+   "back": "Workflow: LLMs and tools follow predefined code paths. Agent: the LLM dynamically directs its own process and tool use. Start with the simplest thing (often a single call or a workflow); use an agent only when the steps can't be predicted and the extra cost/latency/risk is worth it.",
+   "source": "B1"
+  },
+  {
+   "id": "aia-fc-workflow-patterns",
+   "type": "flashcard",
+   "stage": "design",
+   "difficulty": 2,
+   "tags": [
+    "agents",
+    "patterns"
+   ],
+   "pattern": "Workflow patterns",
+   "front": "Name the five workflow patterns in 'Building effective agents'.",
+   "back": "Prompt chaining, routing, parallelization, orchestrator-workers, evaluator-optimizer.",
+   "source": "B1"
+  },
+  {
+   "id": "aia-fc-agent-principles",
+   "type": "flashcard",
+   "stage": "design",
+   "difficulty": 2,
+   "tags": [
+    "agents"
+   ],
+   "pattern": "Agent design principles",
+   "front": "What three principles does 'Building effective agents' give for agents?",
+   "back": "Keep the design simple; make the agent's planning visible (transparency); invest in the agent-computer interface (tool docs and testing).",
+   "source": "B1"
+  },
+  {
+   "id": "aia-fc-model-tiering",
+   "type": "flashcard",
+   "stage": "design",
+   "difficulty": 2,
+   "tags": [
+    "models",
+    "cost"
+   ],
+   "pattern": "Model tiering",
+   "front": "How would you tier current Claude models in a customer architecture?",
+   "back": "Haiku 5.5 for high-volume, low-latency steps (routing, classification). Sonnet 5.5 for a speed/intelligence balance. Opus 5.5 is the recommended starting point for most workloads. Fable 5.1 for demanding reasoning and long-horizon agentic work. Choose per step using evals and cost.",
+   "source": "D1"
+  },
+  {
+   "id": "aia-fc-contextual-retrieval",
+   "type": "flashcard",
+   "stage": "design",
+   "difficulty": 2,
+   "tags": [
+    "rag",
+    "retrieval"
+   ],
+   "pattern": "Contextual retrieval",
+   "front": "What is Contextual Retrieval and how much did it help?",
+   "back": "Prepend chunk-specific context (explaining where the chunk sits in its document) before embedding and BM25 indexing. It cut top-20 retrieval failures by 49% (contextual embeddings + contextual BM25), and by 67% with reranking.",
+   "source": "B4"
+  },
+  {
+   "id": "aia-fc-rbac-retrieval",
+   "type": "flashcard",
+   "stage": "design",
+   "difficulty": 2,
+   "tags": [
+    "rag",
+    "rbac",
+    "security"
+   ],
+   "pattern": "Permission-aware retrieval",
+   "front": "How do you enforce role-based access in an enterprise RAG system?",
+   "back": "Store source ACLs as metadata on every chunk, sync them from the source systems, and filter at retrieval time using the user's SSO identity (not a shared service account). Add leakage tests with users of different roles to the eval set, and audit-log queries and returned documents.",
+   "source": "S12"
+  },
+  {
+   "id": "aia-fc-tool-design",
+   "type": "flashcard",
+   "stage": "design",
+   "difficulty": 2,
+   "tags": [
+    "tools",
+    "mcp"
+   ],
+   "pattern": "Tool design",
+   "front": "Tool design tips from 'Writing effective tools for agents'?",
+   "back": "Choose a few deliberate, task-shaped tools (not a wrapper per API endpoint); namespace them (e.g. crm_search, erp_get_order); return high-signal, compact context; and test tools with evals.",
+   "source": "B3"
+  },
+  {
+   "id": "aia-fc-rollout",
+   "type": "flashcard",
+   "stage": "design",
+   "difficulty": 1,
+   "tags": [
+    "rollout"
+   ],
+   "pattern": "Pilot -> shadow -> staged",
+   "front": "What's a safe rollout sequence for an enterprise LLM feature?",
+   "back": "Pilot with a small group and an eval set, then shadow mode (model runs alongside humans, outputs compared, not acted on), then staged launch by group or category. Add monitoring, cost controls and a feedback loop into the eval set.",
+   "source": "S12"
+  },
+  {
+   "id": "aia-fc-human-checkpoints",
+   "type": "flashcard",
+   "stage": "design",
+   "difficulty": 1,
+   "tags": [
+    "guardrails",
+    "human-in-the-loop"
+   ],
+   "pattern": "Approval gates",
+   "front": "Where do human checkpoints belong in an agent design?",
+   "back": "Before irreversible or high-impact actions (sending to customers, payments, writes to systems of record, parts orders), and as escalation for low confidence or out-of-scope cases. Log every approval."
+  },
+  {
+   "id": "aia-fc-prompt-caching",
+   "type": "flashcard",
+   "stage": "technical",
+   "difficulty": 2,
+   "tags": [
+    "cost",
+    "caching"
+   ],
+   "pattern": "Prompt caching",
+   "front": "How much do prompt-cache reads cost, and when do you use caching?",
+   "back": "Cache reads cost 10% of the base input price (5% on Opus 5.5 and Sonnet 5.5; 2.5% on Fable 5.1). Use it for long, repeated prefixes: system prompts, tool definitions, policy documents, few-shot examples.",
+   "source": "D1"
+  },
+  {
+   "id": "aia-fc-batches",
+   "type": "flashcard",
+   "stage": "technical",
+   "difficulty": 1,
+   "tags": [
+    "cost",
+    "batch"
+   ],
+   "pattern": "Batch processing",
+   "front": "When do you recommend the Message Batches API, and what does it save?",
+   "back": "For asynchronous, non-latency-sensitive work (overnight extraction, backfills, monthly reports, eval runs). Batches get a 50% discount.",
+   "source": "D1"
+  },
+  {
+   "id": "aia-fc-context-window",
+   "type": "flashcard",
+   "stage": "technical",
+   "difficulty": 1,
+   "tags": [
+    "models"
+   ],
+   "pattern": "Model limits",
+   "front": "Context window and max output on current Claude models?",
+   "back": "1M-token context window and 128K max output tokens on the current models (Fable 5.1, Opus 5.5, Sonnet 5.5, Haiku 5.5).",
+   "source": "D1"
+  },
+  {
+   "id": "aia-fc-browser-keys",
+   "type": "flashcard",
+   "stage": "technical",
+   "difficulty": 2,
+   "tags": [
+    "security",
+    "api"
+   ],
+   "pattern": "Keys server-side",
+   "front": "Can you call the Claude API directly from a browser for a customer app?",
+   "back": "Docs recommend a back end. Direct browser calls need the `anthropic-dangerous-direct-browser-access: true` header and are acceptable only for trusted internal tools or short-lived dev keys. Orgs with ZDR or the Compliance API enabled can't make browser (CORS) calls at all: they get a 401.",
+   "source": "D4"
+  },
+  {
+   "id": "aia-fc-api-version",
+   "type": "flashcard",
+   "stage": "technical",
+   "difficulty": 3,
+   "tags": [
+    "api"
+   ],
+   "pattern": "API versioning",
+   "front": "What breaks if you move to `anthropic-version: 2026-10-21`?",
+   "back": "The `temperature`, `top_p` and `top_k` parameters are removed and return a 400 error. Don't send them with that version.",
+   "source": "D3"
+  },
+  {
+   "id": "aia-fc-take-home-structure",
+   "type": "flashcard",
+   "stage": "technical",
+   "difficulty": 1,
+   "tags": [
+    "take-home",
+    "presentation"
+   ],
+   "pattern": "Take-home presentation structure",
+   "front": "Structure for presenting a take-home Claude app to a panel?",
+   "back": "1) Customer problem & success criteria  2) Architecture diagram  3) Prompt & tool design  4) Evals with numbers  5) Failure modes & guardrails  6) Cost & latency (caching, batches, model choice)  7) Next steps with the customer. State assumptions; leave time for Q&A.",
+   "source": "S12"
+  },
+  {
+   "id": "aia-fc-take-home-ai",
+   "type": "flashcard",
+   "stage": "technical",
+   "difficulty": 1,
+   "tags": [
+    "process"
+   ],
+   "pattern": "Candidate AI guidance",
+   "front": "May you use Claude while building Anthropic's take-home?",
+   "back": "Not unless Anthropic says otherwise. Take-homes are done without Claude unless indicated, and live interviews are 'all you'. Using Claude to prepare is encouraged.",
+   "source": "S9"
+  },
+  {
+   "id": "aia-fc-eval-harness",
+   "type": "flashcard",
+   "stage": "technical",
+   "difficulty": 2,
+   "tags": [
+    "evals"
+   ],
+   "pattern": "Eval harness for customers",
+   "front": "How do you build an eval harness with a customer?",
+   "back": "Define success criteria with the customer; build a golden set from real cases (agents: start with 20-50 tasks from real failures); pick graders: code where possible, LLM judges calibrated against humans, human review; grade outcomes rather than paths; rerun on every prompt/model change; watch for saturation.",
+   "source": "B2"
+  },
+  {
+   "id": "aia-fc-grader-types",
+   "type": "flashcard",
+   "stage": "technical",
+   "difficulty": 2,
+   "tags": [
+    "evals"
+   ],
+   "pattern": "Grader types",
+   "front": "Three kinds of graders for LLM evals, and a trade-off for each?",
+   "back": "Code-based (fast, cheap, objective, but only for checkable outputs); model-based / LLM judge (flexible for open-ended outputs, must be calibrated against human labels); human (gold standard, slow and expensive, use for calibration and spot checks).",
+   "source": "B2"
+  },
+  {
+   "id": "aia-fc-rsp-version",
+   "type": "flashcard",
+   "stage": "values",
+   "difficulty": 2,
+   "tags": [
+    "rsp",
+    "safety"
+   ],
+   "pattern": "RSP basics",
+   "front": "Current RSP version, and what triggers stronger safeguards?",
+   "back": "RSP v3.4, effective 2026-07-08. Capability thresholds trigger stronger ASL safeguards. The ASL-3 deployment standard is defense in depth: access controls, real-time classifiers, async monitoring, jailbreak rapid response.",
+   "source": "B5"
+  },
+  {
+   "id": "aia-fc-core-views",
+   "type": "flashcard",
+   "stage": "values",
+   "difficulty": 2,
+   "tags": [
+    "core-views",
+    "mission"
+   ],
+   "pattern": "Core Views",
+   "front": "Core Views on AI Safety in one sentence?",
+   "back": "Transformative AI may arrive within about a decade and nobody yet knows how to make it reliably safe, so Anthropic does empirical safety research on frontier systems with a portfolio approach across optimistic, intermediate and pessimistic scenarios.",
+   "source": "B6"
+  },
+  {
+   "id": "aia-fc-reported-screen-qs",
+   "type": "flashcard",
+   "stage": "screen",
+   "difficulty": 1,
+   "tags": [
+    "process",
+    "motivation"
+   ],
+   "pattern": "Reported screen questions",
+   "front": "Which hiring-manager questions were reported on Glassdoor for Anthropic SA roles?",
+   "back": "Why you want to join; your views on Anthropic's research papers; and (one candidate) whether you'd be fine if the stock went to zero.",
+   "source": "S10"
+  }
+ ]
+}

@@ -1,0 +1,276 @@
+{
+ "version": "1.0.0",
+ "items": [
+  {
+   "id": "aia-ds-quality-deviation-rag",
+   "type": "design",
+   "stage": "design",
+   "difficulty": 3,
+   "tags": [
+    "manufacturing",
+    "rag",
+    "multilingual",
+    "quality"
+   ],
+   "pattern": "Multilingual RAG over controlled documents",
+   "title": "Quality-deviation assistant over multilingual SOPs",
+   "minutes": 15,
+   "prompt": "A machinery maker with plants in Germany, the French-speaking part of\nSwitzerland and China wants quality engineers to describe a deviation\n(e.g. weld porosity on line 3) and get the relevant SOP steps, past\ndeviation reports and a draft CAPA.\n\nConstraints:\n- 12,000 SOPs and reports in German, French and Chinese; many have\n  several revisions and only the released one is valid.\n- The quality system (QMS) is the system of record; audits are strict.\n- China plant data must stay in-region.\n\nDesign it.\n",
+   "rubric": [
+    {
+     "criterion": "Requirements",
+     "lookFor": "Asks who uses it (quality engineers vs operators), top deviation types, how CAPAs are written and approved today, revision control rules, audit requirements, residency per plant.",
+     "weight": 1
+    },
+    {
+     "criterion": "Architecture",
+     "lookFor": "Ingest only released SOP revisions from the QMS with metadata (plant, line, revision, language); contextual retrieval (contextual embeddings + BM25 + rerank) across languages; Claude answers in the user's language but quotes the source in its original language with citations; CAPA draft as structured output; regional deployment for China data.",
+     "weight": 1
+    },
+    {
+     "criterion": "Evals",
+     "lookFor": "Golden set of ~50 past deviations per plant with the SOPs an expert would cite and the final CAPA; retrieval recall@k by language; citation accuracy (code check that cited revision is the released one); LLM-judge for CAPA quality calibrated with quality engineers; regression on re-indexing.",
+     "weight": 1.5
+    },
+    {
+     "criterion": "Guardrails",
+     "lookFor": "Answer only from retrieved released documents; flag when no SOP matches; never invent SOP numbers; translation shown as aid with original text; documents treated as data.",
+     "weight": 1
+    },
+    {
+     "criterion": "Human checkpoints",
+     "lookFor": "Quality engineer edits and approves every CAPA in the QMS; Claude never writes to the QMS directly; escalation for safety-critical deviations.",
+     "weight": 1
+    },
+    {
+     "criterion": "Security",
+     "lookFor": "RBAC from plant/role in identity provider applied at retrieval; regional data separation; audit log of queries, retrieved docs and drafts; retention settings reviewed with IT and quality.",
+     "weight": 1
+    },
+    {
+     "criterion": "Rollout",
+     "lookFor": "Pilot one plant and one deviation category, measure time-to-draft and citation accuracy against golden set, then add plants/languages; shadow mode on live deviations before engineers rely on it.",
+     "weight": 1
+    }
+   ],
+   "outline": "- Discovery: users, top deviation types, CAPA process, audit rules, residency per plant.\n- Corpus: released revisions only, metadata per chunk, multilingual contextual retrieval + rerank.\n- Answer: user's language, original-language quotes, citations with revision id; CAPA as structured draft.\n- Evals: 50 past deviations per plant; recall@k per language; citation validity; calibrated judge for CAPA.\n- Guardrails: no answer without source; never fabricate SOP ids.\n- Human: engineer approves CAPA in QMS; no direct writes.\n- Security: RBAC by plant/role, China data in-region, audit trail.\n- Rollout: one plant/category -> shadow -> expand.\n"
+  },
+  {
+   "id": "aia-ds-field-service-offline",
+   "type": "design",
+   "stage": "design",
+   "difficulty": 3,
+   "tags": [
+    "oil-and-gas",
+    "field-service",
+    "offline",
+    "connectivity"
+   ],
+   "pattern": "Design for intermittent connectivity",
+   "title": "Field-service assistant for remote oil & gas sites",
+   "minutes": 15,
+   "prompt": "An oilfield services company wants a technician assistant for pump and\ncompressor maintenance: troubleshooting help from manuals, past work orders\nand sensor alarms, plus drafting the work report.\n\nConstraints:\n- Many sites have satellite links that drop for hours; bandwidth is low.\n- Technicians wear gloves; tablets are shared.\n- Safety procedures (lock-out/tag-out) must never be skipped or paraphrased.\n- Parts orders go through SAP and need supervisor approval.\n\nDesign it.\n",
+   "rubric": [
+    {
+     "criterion": "Requirements",
+     "lookFor": "Asks about connectivity patterns, which tasks happen offline vs online, device constraints (gloves, shared tablets, voice), safety-critical procedures, SAP workflow, languages.",
+     "weight": 1
+    },
+    {
+     "criterion": "Architecture",
+     "lookFor": "Hybrid: pre-sync job packs before a visit (manuals, asset history, safety procedures) for offline lookup; Claude calls queued when online for troubleshooting and report drafting; compact prompts and responses for low bandwidth; voice-to-text input; SAP integration via a narrow tool that creates a draft parts request only.",
+     "weight": 1
+    },
+    {
+     "criterion": "Evals",
+     "lookFor": "Eval set from past work orders with known root causes; measure top-3 diagnosis hit rate, report completeness against template, and safety-procedure fidelity (code check that LOTO text is verbatim); test with degraded/timeout network conditions.",
+     "weight": 1.5
+    },
+    {
+     "criterion": "Guardrails",
+     "lookFor": "Safety procedures displayed verbatim from source, never generated; assistant says 'unknown, contact engineering' when out of scope; no instructions that override safety documents.",
+     "weight": 1
+    },
+    {
+     "criterion": "Human checkpoints",
+     "lookFor": "Supervisor approves any parts order; technician signs off the report; high-risk equipment recommendations escalated to an engineer.",
+     "weight": 1
+    },
+    {
+     "criterion": "Security",
+     "lookFor": "Per-user login on shared tablets; device encryption for synced packs; scoped SAP permissions; audit log synced when connectivity returns; data retention reviewed.",
+     "weight": 1
+    },
+    {
+     "criterion": "Rollout",
+     "lookFor": "Pilot at one well-connected site first, then one remote site to test offline behaviour; collect technician feedback; scale by asset type.",
+     "weight": 1
+    }
+   ],
+   "outline": "- Discovery: connectivity, offline tasks, devices, safety-critical steps, SAP flow.\n- Offline layer: pre-synced job packs + local search; safety docs shown verbatim.\n- Online layer: Claude for troubleshooting and report drafts, queued and retried; small payloads.\n- SAP: draft-only parts request tool; supervisor approval.\n- Evals: past work orders, top-3 diagnosis, LOTO verbatim check, degraded-network tests.\n- Security: per-user auth on shared devices, encryption, scoped SAP access.\n- Rollout: connected site -> remote site -> scale by asset type.\n"
+  },
+  {
+   "id": "aia-ds-take-home-plan",
+   "type": "design",
+   "stage": "technical",
+   "difficulty": 2,
+   "tags": [
+    "take-home",
+    "presentation",
+    "demo"
+   ],
+   "pattern": "Take-home presentation structure",
+   "source": "S13",
+   "title": "Take-home: present a small Claude app for a fictional customer",
+   "minutes": 12,
+   "prompt": "Take-home brief (practice version): \"Coastline Logistics wants to cut the\ntime dispatchers spend reading carrier emails about delays. Build a small\nClaude-powered app in ~4 hours and present it in 30 minutes.\"\n\nYou've built a prototype that reads emails, extracts shipment id, new ETA\nand reason, and flags urgent ones.\n\nOutline your 30-minute presentation and live demo. What do you show, in\nwhat order, and what numbers do you bring?\n",
+   "rubric": [
+    {
+     "criterion": "Requirements",
+     "lookFor": "Opens with the customer's problem and success criteria in their terms (minutes per dispatcher per day, missed urgent delays); states assumptions explicitly.",
+     "weight": 1
+    },
+    {
+     "criterion": "Architecture",
+     "lookFor": "Simple architecture diagram: email in -> Claude with structured output (JSON schema) -> validation -> dashboard/alert; explains model choice (small fast model for extraction, why), and why a workflow, not an agent.",
+     "weight": 1
+    },
+    {
+     "criterion": "Evals",
+     "lookFor": "Shows a small labelled eval set (e.g. 30-50 emails incl. edge cases) with field-level accuracy and urgent-flag precision/recall; shows one failure case honestly.",
+     "weight": 1.5
+    },
+    {
+     "criterion": "Guardrails",
+     "lookFor": "Covers failure modes: missing fields, ambiguous dates/time zones, prompt injection in emails; 'unknown' allowed; validation rules.",
+     "weight": 1
+    },
+    {
+     "criterion": "Human checkpoints",
+     "lookFor": "Explains where a dispatcher confirms before any customer notification is sent.",
+     "weight": 1
+    },
+    {
+     "criterion": "Security",
+     "lookFor": "Mentions API keys server-side (never in the browser), data retention options, PII in emails.",
+     "weight": 1
+    },
+    {
+     "criterion": "Rollout",
+     "lookFor": "Cost and latency per email (caching for the shared prompt, batches for backfill), and a concrete next step: pilot with 3 dispatchers, success metric, timeline; leaves time for Q&A.",
+     "weight": 1
+    }
+   ],
+   "outline": "1. Customer problem + success criteria (2 min); assumptions.\n2. Live demo of the happy path, then one tricky email (5-7 min).\n3. Architecture diagram; workflow vs agent; model choice (3 min).\n4. Prompt and schema design; tool design if any (3 min).\n5. Evals with numbers: dataset, accuracy per field, urgent recall, one failure (5 min).\n6. Failure modes and guardrails; security (keys server-side, retention) (3 min).\n7. Cost/latency per email; caching, batches (2 min).\n8. Next steps with the customer: pilot, metric, owner (2 min).\n9. Q&A (5+ min).\n"
+  },
+  {
+   "id": "aia-ds-pdm-report-summarizer",
+   "type": "design",
+   "stage": "design",
+   "difficulty": 2,
+   "tags": [
+    "manufacturing",
+    "predictive-maintenance",
+    "summarization",
+    "evals"
+   ],
+   "pattern": "Summarisation evals that check facts, not style",
+   "title": "Predictive-maintenance report summariser",
+   "minutes": 10,
+   "prompt": "A packaging-machine manufacturer sends customers monthly predictive-\nmaintenance reports: 40-page PDFs with vibration trends, alarms and\nrecommendations. Customers don't read them. The company wants Claude to\nproduce a one-page summary per machine for plant managers, in English,\nGerman or Spanish.\n\nConstraints: 3,000 reports/month; numbers and recommendations must match\nthe source exactly; the service team is liable for recommendations.\n\nDesign the system with a strong eval plan.\n",
+   "rubric": [
+    {
+     "criterion": "Requirements",
+     "lookFor": "Asks what plant managers decide from the report, which fields matter (risk level, recommended action, deadline), how the service team writes recommendations today, languages and timing.",
+     "weight": 1
+    },
+    {
+     "criterion": "Architecture",
+     "lookFor": "Monthly Batch API run (cost, not latency-sensitive); structured extraction of key facts first, then summary generation from extracted facts; shared instructions cached; template per language.",
+     "weight": 1
+    },
+    {
+     "criterion": "Evals",
+     "lookFor": "Eval set of past reports with service-engineer-written summaries; code checks that every number and part id in the summary exists in the source; LLM judge for completeness of top risks calibrated against engineers; track 'missed critical alarm' rate as a gate.",
+     "weight": 1.5
+    },
+    {
+     "criterion": "Guardrails",
+     "lookFor": "Recommendations copied from the engineer-written source, not invented; summary must cite page/section; uncertainty language preserved; no new advice generated.",
+     "weight": 1
+    },
+    {
+     "criterion": "Human checkpoints",
+     "lookFor": "Service engineer approves summaries for machines flagged high-risk; random sample review for the rest.",
+     "weight": 1
+    },
+    {
+     "criterion": "Security",
+     "lookFor": "Customer data separated per customer tenant; retention settings; audit trail of source, summary and approver.",
+     "weight": 1
+    },
+    {
+     "criterion": "Rollout",
+     "lookFor": "Pilot with 3 friendly customers and one machine type, gather plant manager feedback (did they act sooner?), then expand languages and machine types.",
+     "weight": 1
+    }
+   ],
+   "outline": "- Clarify decisions plant managers make; critical fields; liability.\n- Pipeline: batch extraction of facts -> summary from facts -> per-language template.\n- Evals: number/part-id faithfulness check by code, critical-alarm recall, calibrated judge.\n- Guardrails: no new recommendations; citations to page.\n- Human: engineer approves high-risk; sampling for the rest.\n- Rollout: 3 customers, one machine type, measure action rate.\n"
+  },
+  {
+   "id": "aia-ds-legacy-erp-integration",
+   "type": "design",
+   "stage": "design",
+   "difficulty": 3,
+   "tags": [
+    "integration",
+    "legacy",
+    "erp",
+    "mcp"
+   ],
+   "pattern": "Secure integration with legacy systems",
+   "source": "S12",
+   "title": "Claude agent on a legacy ERP",
+   "minutes": 12,
+   "prompt": "A chemicals distributor runs a 15-year-old on-prem ERP with a SOAP API and\nnightly CSV exports. Sales reps want to ask Claude about order status,\nstock and customer credit limits from Microsoft Teams, and later let it\ncreate quotes.\n\nConstraints: the ERP team will only expose read endpoints at first; credit\nlimits are confidential to finance and the rep's own accounts; the ERP\nslows down under load.\n\nDesign the integration.\n",
+   "rubric": [
+    {
+     "criterion": "Requirements",
+     "lookFor": "Asks top rep questions, data freshness needed (live vs nightly ok), who may see credit limits, ERP load limits, future write use cases.",
+     "weight": 1
+    },
+    {
+     "criterion": "Architecture",
+     "lookFor": "Integration layer (MCP server or internal API) in front of the ERP with task-shaped read tools; cache/replica from nightly exports for heavy queries; live SOAP calls only where freshness matters; Teams bot front end; workflow over agent for phase 1.",
+     "weight": 1
+    },
+    {
+     "criterion": "Evals",
+     "lookFor": "Test set of real rep questions with ERP-verified answers; code graders on figures; tool-selection accuracy; load tests against the ERP; regression on tool or prompt changes.",
+     "weight": 1.5
+    },
+    {
+     "criterion": "Guardrails",
+     "lookFor": "Read-only tools; rate limiting and circuit breaker; tool results validated and summarised; refuse when data unavailable.",
+     "weight": 1
+    },
+    {
+     "criterion": "Human checkpoints",
+     "lookFor": "Future quote creation as draft for rep confirmation, with manager approval above a threshold.",
+     "weight": 1
+    },
+    {
+     "criterion": "Security",
+     "lookFor": "User identity passed through so reps only see their accounts; credit limits filtered by role; service credentials in a vault; audit log of every tool call.",
+     "weight": 1
+    },
+    {
+     "criterion": "Rollout",
+     "lookFor": "Phase 1 read-only with 10 reps, measure time saved and ERP load; phase 2 draft quotes behind approval.",
+     "weight": 1
+    }
+   ],
+   "outline": "- Clarify questions, freshness, permissions, ERP limits.\n- Integration layer with few read tools; cache from nightly exports; live calls sparingly.\n- Identity passthrough and role filtering for credit data.\n- Evals: real questions with ERP answers; tool selection; load tests.\n- Phase 2: draft quotes + approval gate.\n- Rollout: 10 reps read-only -> writes behind approval.\n"
+  }
+ ]
+}

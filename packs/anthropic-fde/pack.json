@@ -24,5 +24,5 @@
      "tests": "Mission alignment, AI-risk reasoning and honesty; reportedly weighted like the technical rounds. Specific, honest views beat 'performing alignment'.",
      "methodology": "STAR (Situation, Task, Action, Result) + honest reflection. Know the RSP (v3.x) and Core Views well enough to agree and disagree with specifics.", "mockMinutes": 10}
   ],
-  "files": ["challenges.json", "bugs.json", "predict.json", "parsons.json", "flashcards.json", "design.json", "roleplay.json", "behavioral.json"]
+  "files": ["challenges-a.json", "challenges-b.json", "bugs.json", "predict.json", "parsons.json", "flashcards.json", "design.json", "roleplay.json", "behavioral.json"]
 }

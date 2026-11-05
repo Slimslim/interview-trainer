@@ -1,0 +1,542 @@
+{
+ "version": "1.0.0",
+ "items": [
+  {
+   "id": "fde-bh-why-anthropic",
+   "type": "behavioral",
+   "stage": "screen",
+   "difficulty": 1,
+   "tags": [
+    "motivation"
+   ],
+   "pattern": "Specific, sourced motivation",
+   "question": "Why Anthropic?",
+   "lookFor": [
+    "Two or three specific reasons, at least one tied to something you've read (RSP v3.x, Core Views) and hold a view on.",
+    "Connects to your own work: you built a production Claude platform and saw what safe deployment needs.",
+    "Avoids generic 'AI safety is important' or 'performing alignment'.",
+    "Honest about what you don't know yet."
+   ],
+   "followUps": [
+    "What would make you leave Anthropic?",
+    "Which other AI companies did you consider, and why not them?"
+   ],
+   "value": "Put the mission first",
+   "source": "S13"
+  },
+  {
+   "id": "fde-bh-why-fde",
+   "type": "behavioral",
+   "stage": "screen",
+   "difficulty": 1,
+   "tags": [
+    "motivation",
+    "role-fit"
+   ],
+   "pattern": "Role fit from evidence",
+   "question": "Why Forward Deployed Engineer rather than a pure engineering or sales role?",
+   "lookFor": [
+    "Shows you understand the job: embedding with customers, building production artifacts (MCP servers, agents), and driving adoption.",
+    "Evidence from your 10+ years of technical customer work that you like being on site with customers.",
+    "Evidence from your AI platform that you can build, not only advise.",
+    "Names the part of the job you'll find hardest."
+   ],
+   "followUps": [
+    "What part of the FDE job do you expect to find hardest?",
+    "How do you feel about 25-50% travel?"
+   ],
+   "value": "Be good to our users",
+   "source": "S15"
+  },
+  {
+   "id": "fde-bh-models-used",
+   "type": "behavioral",
+   "stage": "screen",
+   "difficulty": 1,
+   "tags": [
+    "claude",
+    "experience"
+   ],
+   "pattern": "Concrete product experience",
+   "question": "Which of our models have you used, and what did you build with them?",
+   "lookFor": [
+    "Concrete: Claude API with tool use, batches and web search; an MCP server; research agents; approval steps and audit logs.",
+    "Explains why you chose specific features (e.g. batches for cost, tool use for system access) and model tradeoffs.",
+    "Mentions one limitation you hit and how you handled it.",
+    "Doesn't invent usage numbers you can't back up."
+   ],
+   "followUps": [
+    "How did you decide which model to use where?",
+    "What broke first in production?",
+    "How did you know the outputs were good enough?"
+   ],
+   "source": "S16"
+  },
+  {
+   "id": "fde-bh-pitch",
+   "type": "behavioral",
+   "stage": "screen",
+   "difficulty": 1,
+   "tags": [
+    "pitch"
+   ],
+   "pattern": "Tight career narrative",
+   "question": "Give me your 60-second background.",
+   "lookFor": [
+    "Arc in three beats: EPFL engineer -> 10+ years technical customer-facing (laser & additive manufacturing equipment, CH/CN/US) -> solo-built an internal Claude platform in production.",
+    "Ends with why that leads to this role.",
+    "Under 90 seconds; no CV recital."
+   ],
+   "followUps": [
+    "Why did you move from equipment into AI?",
+    "What would your last customer say about you?"
+   ]
+  },
+  {
+   "id": "fde-bh-project-deep-dive",
+   "type": "behavioral",
+   "stage": "screen",
+   "difficulty": 2,
+   "tags": [
+    "deep-dive",
+    "ownership"
+   ],
+   "pattern": "Project deep dive",
+   "question": "Walk me through one project you owned end to end. What were the hardest decisions?",
+   "lookFor": [
+    "STAR plus architecture: problem -> constraints -> decisions and tradeoffs -> what broke -> metrics -> what you'd change.",
+    "Your own decisions, clearly separated from what others did.",
+    "Real numbers where you have them (users, time saved, error rates), honest where you don't.",
+    "Names a mistake, e.g. adding formal evals too late."
+   ],
+   "followUps": [
+    "If you rebuilt it today, what would you change?",
+    "What did you decide not to build, and why?",
+    "How did you get people to actually use it?"
+   ],
+   "source": "S15"
+  },
+  {
+   "id": "fde-bh-solo-build-tradeoffs",
+   "type": "behavioral",
+   "stage": "screen",
+   "difficulty": 2,
+   "tags": [
+    "tradeoffs",
+    "architecture"
+   ],
+   "pattern": "Justify pragmatic tool choices",
+   "question": "You built your AI platform alone. Why n8n and Supabase instead of writing everything in code?",
+   "lookFor": [
+    "Shows judgment: speed, maintainability by a small team, using what the company could support.",
+    "Acknowledges limits (testing, version control, scaling) and how you handled them.",
+    "Links to 'do the simple thing that works'."
+   ],
+   "followUps": [
+    "When would you move off n8n?",
+    "How did you version and test workflows?"
+   ],
+   "value": "Do the simple thing that works"
+  },
+  {
+   "id": "fde-bh-evals-gap",
+   "type": "behavioral",
+   "stage": "screen",
+   "difficulty": 2,
+   "tags": [
+    "evals",
+    "honesty"
+   ],
+   "pattern": "Own a gap honestly",
+   "question": "How did you evaluate whether your Claude workflows were good enough?",
+   "lookFor": [
+    "Honest about what you did (spot checks, user feedback, approval-step data) and what you didn't (formal golden sets).",
+    "Describes what you'd do now: golden set from real cases, code graders where possible, calibrated LLM judge, regression on prompt changes.",
+    "No overclaiming."
+   ],
+   "followUps": [
+    "What metric would you have tracked first?",
+    "How would you calibrate an LLM grader?"
+   ],
+   "value": "Be helpful, honest, and harmless"
+  },
+  {
+   "id": "fde-bh-values-tested",
+   "type": "behavioral",
+   "stage": "values",
+   "difficulty": 2,
+   "tags": [
+    "integrity",
+    "star"
+   ],
+   "pattern": "Values under pressure (STAR)",
+   "question": "Tell me about a time your values were tested at work.",
+   "lookFor": [
+    "A real situation with stakes (e.g. pressure to ship equipment or a workflow you knew wasn't ready).",
+    "What you did, what it cost you, and the outcome.",
+    "Honest reflection: what you'd do differently.",
+    "Link to an Anthropic value without forcing it."
+   ],
+   "followUps": [
+    "Would you make the same call again?",
+    "How did the other person react?"
+   ],
+   "value": "Be helpful, honest, and harmless",
+   "source": "S15"
+  },
+  {
+   "id": "fde-bh-ai-worries",
+   "type": "behavioral",
+   "stage": "values",
+   "difficulty": 2,
+   "tags": [
+    "ai-risk"
+   ],
+   "pattern": "Calibrated AI-risk view",
+   "question": "What worries you about deploying powerful AI?",
+   "lookFor": [
+    "A specific, reasoned worry (e.g. agents with write access acting on injected instructions, over-reliance by non-experts, misuse) rather than slogans.",
+    "Grounded in what you've seen in your own deployments.",
+    "Calibrated uncertainty; mentions both near-term and longer-term risks.",
+    "What you personally do about it (approval steps, audit logs, scope limits)."
+   ],
+   "followUps": [
+    "Which worry do you think is overrated?",
+    "How would you explain that risk to a customer?"
+   ],
+   "value": "Hold light and shade",
+   "source": "S16"
+  },
+  {
+   "id": "fde-bh-rsp-opinion",
+   "type": "behavioral",
+   "stage": "values",
+   "difficulty": 3,
+   "tags": [
+    "rsp",
+    "safety"
+   ],
+   "pattern": "Informed opinion on the RSP",
+   "question": "What do you think of our Responsible Scaling Policy? Is there anything you disagree with?",
+   "lookFor": [
+    "Knows the basics: capability thresholds trigger stronger safeguards (ASL levels); v3.x adds Frontier Safety Roadmaps and Risk Reports.",
+    "Gives one genuine opinion or open question, e.g. how external review via the Long-Term Benefit Trust works, or how a customer experiences classifiers.",
+    "Willing to disagree respectfully; doesn't just praise."
+   ],
+   "followUps": [
+    "How would you explain ASL-3 safeguards to a customer who gets a false refusal?",
+    "What would make you lose trust in the RSP?"
+   ],
+   "value": "Ignite a race to the top on safety"
+  },
+  {
+   "id": "fde-bh-core-views",
+   "type": "behavioral",
+   "stage": "values",
+   "difficulty": 3,
+   "tags": [
+    "core-views",
+    "safety"
+   ],
+   "pattern": "Reason under uncertainty",
+   "question": "Core Views describes optimistic, intermediate and pessimistic scenarios. Which do you find most likely, and why?",
+   "lookFor": [
+    "Accurately describes the three scenarios.",
+    "Picks one with reasons and admits uncertainty.",
+    "Connects it to how Anthropic should act (empirical research, 'show, don't tell')."
+   ],
+   "followUps": [
+    "What evidence would change your mind?",
+    "What should Anthropic do if it became clear we're in the pessimistic case?"
+   ],
+   "value": "Hold light and shade"
+  },
+  {
+   "id": "fde-bh-safety-vs-speed",
+   "type": "behavioral",
+   "stage": "values",
+   "difficulty": 2,
+   "tags": [
+    "safety",
+    "tradeoffs",
+    "star"
+   ],
+   "pattern": "Safety vs speed tradeoff",
+   "question": "Tell me about a time you slowed down a launch for safety or quality reasons.",
+   "lookFor": [
+    "Concrete stakes: customer pressure, revenue or timeline.",
+    "How you made the risk visible and proposed an alternative (smaller scope, pilot, extra test).",
+    "Result and what the relationship looked like afterwards."
+   ],
+   "followUps": [
+    "Was anyone unhappy with you?",
+    "When is it right to ship anyway?"
+   ],
+   "value": "Be good to our users"
+  },
+  {
+   "id": "fde-bh-mistake",
+   "type": "behavioral",
+   "stage": "values",
+   "difficulty": 2,
+   "tags": [
+    "ownership",
+    "honesty",
+    "star"
+   ],
+   "pattern": "Own and fix a mistake",
+   "question": "Tell me about a mistake you made that affected a customer or user.",
+   "lookFor": [
+    "Takes ownership without excuses.",
+    "What you did immediately to limit damage and how you told the customer.",
+    "The systemic fix (process, check, guardrail), not only 'I'll be more careful'."
+   ],
+   "followUps": [
+    "How did you find out?",
+    "What would have caught it earlier?"
+   ],
+   "value": "Be helpful, honest, and harmless"
+  },
+  {
+   "id": "fde-bh-disagreement",
+   "type": "behavioral",
+   "stage": "values",
+   "difficulty": 2,
+   "tags": [
+    "conflict",
+    "star"
+   ],
+   "pattern": "Disagree constructively",
+   "question": "Tell me about a time you disagreed with your manager or a senior colleague.",
+   "lookFor": [
+    "Disagreed on substance with data, not ego.",
+    "How you raised it and listened to the other side.",
+    "Outcome, including if you were wrong; 'disagree and commit' if applicable."
+   ],
+   "followUps": [
+    "What would you have done if they still said no?",
+    "Were you right in the end?"
+   ],
+   "value": "High-trust, low-ego"
+  },
+  {
+   "id": "fde-bh-dont-know",
+   "type": "behavioral",
+   "stage": "values",
+   "difficulty": 1,
+   "tags": [
+    "honesty"
+   ],
+   "pattern": "Calibrated honesty",
+   "question": "Tell me about a time you had to say 'I don't know' to a customer.",
+   "lookFor": [
+    "Admits the gap in the moment instead of bluffing.",
+    "How you found the answer and followed up.",
+    "Why honesty kept the customer's trust."
+   ],
+   "followUps": [
+    "Have you ever bluffed? What happened?",
+    "How do you prepare for questions you can't answer?"
+   ],
+   "value": "Be helpful, honest, and harmless"
+  },
+  {
+   "id": "fde-bh-misuse-request",
+   "type": "behavioral",
+   "stage": "values",
+   "difficulty": 2,
+   "tags": [
+    "guardrails",
+    "scenario"
+   ],
+   "pattern": "Safe default, customer-centred reasoning",
+   "question": "A customer asks you to build an agent with unrestricted write access to production systems 'to save time'. What do you do?",
+   "lookFor": [
+    "Doesn't just refuse: understands the goal behind the request.",
+    "Proposes least-privilege tools, approval gates for irreversible actions, audit logs, staged rollout.",
+    "Explains the risk in the customer's terms (outage, data loss, compliance).",
+    "Knows when to escalate internally."
+   ],
+   "followUps": [
+    "What if they insist and threaten to go to a competitor?",
+    "Which actions would you let run without approval?"
+   ],
+   "value": "Be good to our users"
+  },
+  {
+   "id": "fde-bh-mission-tension",
+   "type": "behavioral",
+   "stage": "values",
+   "difficulty": 3,
+   "tags": [
+    "mission"
+   ],
+   "pattern": "Hold light and shade",
+   "question": "Anthropic both builds frontier models and warns about their risks. How do you think about that tension?",
+   "lookFor": [
+    "Understands the stated rationale: safety research needs frontier systems; influence on industry norms (race to the top).",
+    "Acknowledges the real tension and critiques of it.",
+    "States your own position honestly."
+   ],
+   "followUps": [
+    "What would convince you Anthropic got the balance wrong?",
+    "How would you answer a customer who raises this?"
+   ],
+   "value": "Hold light and shade"
+  },
+  {
+   "id": "fde-bh-difficult-customer",
+   "type": "behavioral",
+   "stage": "customer",
+   "difficulty": 2,
+   "tags": [
+    "customer",
+    "star"
+   ],
+   "pattern": "Difficult customer (STAR)",
+   "question": "Tell me about your most difficult customer and how you handled them.",
+   "lookFor": [
+    "Specific customer situation (e.g. a machine failing acceptance tests abroad) with clear stakes.",
+    "How you separated the emotion from the technical problem and found the real issue.",
+    "Concrete actions and measurable outcome.",
+    "What you learned about managing expectations."
+   ],
+   "followUps": [
+    "What would you do differently?",
+    "How did you keep your own team aligned?"
+   ],
+   "value": "Be good to our users"
+  },
+  {
+   "id": "fde-bh-saying-no",
+   "type": "behavioral",
+   "stage": "customer",
+   "difficulty": 2,
+   "tags": [
+    "customer",
+    "honesty",
+    "star"
+   ],
+   "pattern": "Say no with an alternative",
+   "question": "Tell me about a time you told a customer 'no' or 'not yet'.",
+   "lookFor": [
+    "The request, why it was wrong or risky (equipment limit, safety, quality).",
+    "How you said no while offering a path forward.",
+    "Outcome for the relationship and the deal."
+   ],
+   "followUps": [
+    "Did you lose the deal?",
+    "How do you decide when to escalate instead of saying no yourself?"
+   ],
+   "value": "Be helpful, honest, and harmless"
+  },
+  {
+   "id": "fde-bh-adoption",
+   "type": "behavioral",
+   "stage": "customer",
+   "difficulty": 2,
+   "tags": [
+    "adoption",
+    "change-management"
+   ],
+   "pattern": "Adoption, not just delivery",
+   "question": "You built a great tool and nobody used it. Tell me how you've driven adoption.",
+   "lookFor": [
+    "Real example from rolling out your platform to non-technical colleagues (e.g. via Teams).",
+    "Diagnosed why people didn't use it (trust, workflow fit, training) before pushing harder.",
+    "Specific tactics: champions, meeting users in their tools, quick wins, feedback loops.",
+    "Usage metric before and after."
+   ],
+   "followUps": [
+    "Which group resisted most and why?",
+    "What did you stop building because of user feedback?"
+   ],
+   "value": "Be good to our users"
+  },
+  {
+   "id": "fde-bh-ambiguous-scope",
+   "type": "behavioral",
+   "stage": "customer",
+   "difficulty": 2,
+   "tags": [
+    "discovery",
+    "scoping"
+   ],
+   "pattern": "Scope ambiguity into a pilot",
+   "question": "A customer executive says 'we need AI everywhere'. How do you turn that into something deliverable?",
+   "lookFor": [
+    "Discovery first: business goals, current workflows, pain with numbers.",
+    "Prioritises by value x feasibility x risk; picks one narrow pilot with an eval set.",
+    "Sets expectations about what Claude can and can't do."
+   ],
+   "followUps": [
+    "How do you handle a second executive with conflicting priorities?",
+    "What would make you walk away?"
+   ]
+  },
+  {
+   "id": "fde-bh-bad-news",
+   "type": "behavioral",
+   "stage": "customer",
+   "difficulty": 1,
+   "tags": [
+    "communication",
+    "star"
+   ],
+   "pattern": "Deliver bad news well",
+   "question": "Tell me about a time you had to deliver bad news to a customer about a delay or limitation.",
+   "lookFor": [
+    "Told early, with facts, without blaming others.",
+    "Brought options and a plan.",
+    "How trust changed afterwards."
+   ],
+   "followUps": [
+    "How early did you know?",
+    "What did your company think of how you handled it?"
+   ],
+   "value": "Be helpful, honest, and harmless"
+  },
+  {
+   "id": "fde-bh-cross-cultural",
+   "type": "behavioral",
+   "stage": "customer",
+   "difficulty": 1,
+   "tags": [
+    "communication",
+    "international"
+   ],
+   "pattern": "Adapt to the customer's context",
+   "question": "You've worked with customers in Switzerland, China and the US. How did you adapt?",
+   "lookFor": [
+    "Specific differences you observed (decision-making, directness, escalation).",
+    "One concrete example of adapting your approach.",
+    "Avoids stereotypes; focuses on listening."
+   ],
+   "followUps": [
+    "When did you get it wrong?",
+    "How would that help you embed with a new customer team?"
+   ]
+  },
+  {
+   "id": "fde-bh-feedback-to-product",
+   "type": "behavioral",
+   "stage": "customer",
+   "difficulty": 2,
+   "tags": [
+    "feedback",
+    "product"
+   ],
+   "pattern": "Field-to-product feedback loop",
+   "question": "How would you bring customer feedback back to Anthropic's product and research teams?",
+   "lookFor": [
+    "Recognises the FDE role includes spotting patterns across customers.",
+    "Structured feedback: problem, frequency, impact, workaround, evidence.",
+    "Example from your past of turning field feedback into a product change."
+   ],
+   "followUps": [
+    "How would you prioritise one big customer's request vs a pattern across many?",
+    "What if product says no?"
+   ]
+  }
+ ]
+}

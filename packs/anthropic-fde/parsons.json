@@ -1,0 +1,432 @@
+{
+ "version": "1.0.0",
+ "items": [
+  {
+   "id": "fde-par-bfs-grid",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "graphs",
+    "bfs",
+    "grid"
+   ],
+   "pattern": "BFS",
+   "title": "Shortest path on a grid (BFS)",
+   "prompt": "Order the lines so `shortest(grid, start, goal)` returns the number of steps between two cells of a grid of `'.'` (open) and `'#'` (wall), or -1 if unreachable.",
+   "lines": [
+    "from collections import deque",
+    "def shortest(grid, start, goal):",
+    "    q, seen = deque([(start, 0)]), {start}",
+    "    while q:",
+    "        (r, c), d = q.popleft()",
+    "        if (r, c) == goal: return d",
+    "        for nr, nc in ((r + 1, c), (r - 1, c), (r, c + 1), (r, c - 1)):",
+    "            if 0 <= nr < len(grid) and 0 <= nc < len(grid[0]) and grid[nr][nc] == \".\" and (nr, nc) not in seen:",
+    "                seen.add((nr, nc)); q.append(((nr, nc), d + 1))",
+    "    return -1"
+   ],
+   "tests": "G = [\"..#\",\n     \".##\",\n     \"...\"]\n\ndef test_path():\n    assert shortest(G, (0, 0), (2, 2)) == 4\n\ndef test_same_cell():\n    assert shortest(G, (0, 0), (0, 0)) == 0\n\ndef test_blocked():\n    assert shortest([\".#\", \"#.\"], (0, 0), (1, 1)) == -1\n",
+   "lesson": "BFS explores in distance order, so the first time you pop the goal you have the shortest path. Mark cells as seen when you enqueue them (not when you pop) so no cell is queued twice."
+  },
+  {
+   "id": "fde-par-lru-get",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "design",
+    "ordereddict",
+    "cache"
+   ],
+   "pattern": "LRU cache",
+   "title": "LRU cache with OrderedDict",
+   "prompt": "Order the lines to build an LRU cache: `get` returns -1 on a miss and refreshes recency on a hit; `put` evicts the least recently used key when over capacity.",
+   "lines": [
+    "from collections import OrderedDict",
+    "class LRU:",
+    "    def __init__(self, cap): self.cap, self.d = cap, OrderedDict()",
+    "    def get(self, k):",
+    "        if k not in self.d: return -1",
+    "        self.d.move_to_end(k)",
+    "        return self.d[k]",
+    "    def put(self, k, v):",
+    "        self.d[k] = v; self.d.move_to_end(k)",
+    "        if len(self.d) > self.cap: self.d.popitem(last=False)"
+   ],
+   "tests": "def test_miss():\n    assert LRU(2).get(\"x\") == -1\n\ndef test_get_refreshes():\n    c = LRU(2); c.put(\"a\", 1); c.put(\"b\", 2)\n    assert c.get(\"a\") == 1\n    c.put(\"c\", 3)\n    assert c.get(\"b\") == -1, \"b was least recently used\"\n    assert c.get(\"a\") == 1 and c.get(\"c\") == 3\n\ndef test_update_existing():\n    c = LRU(1); c.put(\"a\", 1); c.put(\"a\", 5)\n    assert c.get(\"a\") == 5\n",
+   "lesson": "Check the miss before touching the dict, then move_to_end on a hit so recency is updated before you return. popitem(last=False) removes the oldest entry."
+  },
+  {
+   "id": "fde-par-token-bucket",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "rate-limit",
+    "design",
+    "time"
+   ],
+   "pattern": "rate limiter",
+   "title": "Token bucket refill",
+   "prompt": "Order the lines so `allow()` refills tokens based on elapsed time (capped at capacity) and then spends one if available. The clock is injected.",
+   "lines": [
+    "class TokenBucket:",
+    "    def __init__(self, rate, capacity, clock):",
+    "        self.rate, self.cap, self.clock, self.tokens, self.last = rate, capacity, clock, capacity, clock()",
+    "    def allow(self):",
+    "        now = self.clock()",
+    "        self.tokens = min(self.cap, self.tokens + (now - self.last) * self.rate)",
+    "        self.last = now",
+    "        if self.tokens >= 1:",
+    "            self.tokens -= 1; return True",
+    "        return False"
+   ],
+   "tests": "class Clock:\n    t = 0.0\n    def __call__(self):\n        return self.t\n\ndef test_burst_then_block():\n    clk = Clock(); b = TokenBucket(1, 2, clk)\n    assert [b.allow(), b.allow(), b.allow()] == [True, True, False]\n\ndef test_refill():\n    clk = Clock(); b = TokenBucket(2, 2, clk)\n    b.allow(); b.allow()\n    clk.t = 0.5\n    assert b.allow() is True, \"0.5 s at 2 tokens/s refills one token\"\n    assert b.allow() is False\n\ndef test_cap():\n    clk = Clock(); b = TokenBucket(1, 2, clk)\n    clk.t = 100\n    assert sum(b.allow() for _ in range(5)) == 2, \"refill is capped at capacity\"\n",
+   "lesson": "Refill first (using time since the last refill, capped at capacity), update `last`, and only then decide. Updating `last` before computing elapsed time would refill nothing."
+  },
+  {
+   "id": "fde-par-tool-loop",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 3,
+   "tags": [
+    "llm",
+    "tool-use",
+    "agents"
+   ],
+   "pattern": "tool-use loop",
+   "title": "Agent tool-use loop",
+   "prompt": "Order the lines so `run(client, messages, tools)` keeps calling the model, runs each requested tool, sends the results back in a user turn, and returns the final text.",
+   "lines": [
+    "def run(client, messages, tools):",
+    "    while True:",
+    "        resp = client.create(messages=messages)",
+    "        messages.append({\"role\": \"assistant\", \"content\": resp[\"content\"]})",
+    "        if resp[\"stop_reason\"] != \"tool_use\":",
+    "            return resp[\"content\"][-1][\"text\"]",
+    "        calls = [b for b in resp[\"content\"] if b[\"type\"] == \"tool_use\"]",
+    "        results = [{\"type\": \"tool_result\", \"tool_use_id\": b[\"id\"], \"content\": tools[b[\"name\"]](**b[\"input\"])} for b in calls]",
+    "        messages.append({\"role\": \"user\", \"content\": results})"
+   ],
+   "tests": "class Fake:\n    def __init__(self):\n        self.n = 0\n    def create(self, messages):\n        self.n += 1\n        assert self.n < 5, \"runaway loop\"\n        assert messages[-1][\"role\"] == \"user\"\n        if self.n == 1:\n            return {\"stop_reason\": \"tool_use\", \"content\": [\n                {\"type\": \"tool_use\", \"id\": \"t1\", \"name\": \"add\", \"input\": {\"a\": 2, \"b\": 3}}]}\n        res = messages[-1][\"content\"][0]\n        assert res[\"tool_use_id\"] == \"t1\"\n        return {\"stop_reason\": \"end_turn\", \"content\": [{\"type\": \"text\", \"text\": f\"= {res['content']}\"}]}\n\ndef test_loop():\n    msgs = [{\"role\": \"user\", \"content\": \"2+3?\"}]\n    assert run(Fake(), msgs, {\"add\": lambda a, b: a + b}) == \"= 5\"\n    assert [m[\"role\"] for m in msgs] == [\"user\", \"assistant\", \"user\", \"assistant\"]\n",
+   "lesson": "Append the assistant turn before checking stop_reason so the history is complete; only a \"tool_use\" stop continues the loop, and the tool results must go in the next user turn, each tagged with its tool_use_id."
+  },
+  {
+   "id": "fde-par-retry-backoff",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "llm",
+    "retry",
+    "errors"
+   ],
+   "pattern": "retry/backoff",
+   "title": "Retry with exponential backoff",
+   "prompt": "Order the lines so `retry(fn, sleep)` retries transient errors with delays 1, 2, 4, ... and re-raises after the last attempt. `sleep` is injected.",
+   "lines": [
+    "class Transient(Exception):",
+    "    pass",
+    "def retry(fn, sleep, attempts=4, base=1):",
+    "    for i in range(attempts):",
+    "        try:",
+    "            return fn()",
+    "        except Transient:",
+    "            if i == attempts - 1:",
+    "                raise",
+    "            sleep(base * 2 ** i)"
+   ],
+   "tests": "def make(fails):\n    n = []\n    def fn():\n        n.append(1)\n        if len(n) <= fails:\n            raise Transient()\n        return \"ok\"\n    return fn\n\ndef test_succeeds_after_retries():\n    waits = []\n    assert retry(make(3), waits.append) == \"ok\"\n    assert waits == [1, 2, 4]\n\ndef test_gives_up():\n    waits = []\n    try:\n        retry(make(10), waits.append)\n        assert False, \"should re-raise\"\n    except Transient:\n        pass\n    assert waits == [1, 2, 4], \"no sleep after the final failure\"\n\ndef test_no_error_no_sleep():\n    waits = []\n    assert retry(make(0), waits.append) == \"ok\" and waits == []\n",
+   "lesson": "`return fn()` sits inside try so success exits immediately; the last-attempt check comes before sleeping so you re-raise without a pointless final wait. Injecting `sleep` keeps tests instant."
+  },
+  {
+   "id": "fde-par-binary-search",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "search",
+    "arrays"
+   ],
+   "pattern": "binary search",
+   "title": "Binary search (leftmost index)",
+   "prompt": "Order the lines so `lower_bound(xs, t)` returns the first index i with xs[i] >= t in a sorted list.",
+   "lines": [
+    "def lower_bound(xs, t):",
+    "    lo, hi = 0, len(xs)",
+    "    while lo < hi:",
+    "        mid = (lo + hi) // 2",
+    "        if xs[mid] < t:",
+    "            lo = mid + 1",
+    "        else:",
+    "            hi = mid",
+    "    return lo"
+   ],
+   "tests": "import bisect\n\ndef test_matches_bisect():\n    xs = [1, 3, 3, 5, 8]\n    for t in range(0, 10):\n        assert lower_bound(xs, t) == bisect.bisect_left(xs, t), f\"t={t}\"\n\ndef test_empty():\n    assert lower_bound([], 4) == 0\n",
+   "lesson": "Use a half-open range [lo, hi) with `while lo < hi`; move lo past mid when xs[mid] is too small, otherwise keep mid as a candidate (hi = mid). This always terminates and returns the insertion point."
+  },
+  {
+   "id": "fde-par-sliding-window",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "strings",
+    "sliding-window",
+    "two-pointer"
+   ],
+   "pattern": "sliding window",
+   "title": "Longest substring without repeats",
+   "prompt": "Order the lines so `longest_unique(s)` returns the length of the longest substring with no repeated characters.",
+   "lines": [
+    "def longest_unique(s):",
+    "    last, left, best = {}, 0, 0",
+    "    for right, ch in enumerate(s):",
+    "        if ch in last and last[ch] >= left:",
+    "            left = last[ch] + 1",
+    "        last[ch] = right",
+    "        best = max(best, right - left + 1)",
+    "    return best"
+   ],
+   "tests": "def test_examples():\n    assert longest_unique(\"abcabcbb\") == 3\n    assert longest_unique(\"bbbbb\") == 1\n    assert longest_unique(\"pwwkew\") == 3\n\ndef test_stale_index():\n    assert longest_unique(\"abba\") == 2, \"ignore last-seen positions left of the window\"\n\ndef test_empty():\n    assert longest_unique(\"\") == 0\n",
+   "lesson": "Shrink the window (move left past the previous occurrence) before recording the new position and measuring; otherwise the window still contains the duplicate."
+  },
+  {
+   "id": "fde-par-merge-intervals",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "sorting",
+    "intervals"
+   ],
+   "pattern": "intervals",
+   "title": "Merge overlapping intervals",
+   "prompt": "Order the lines so `merge(intervals)` merges overlapping [start, end] pairs.",
+   "lines": [
+    "def merge(intervals):",
+    "    out = []",
+    "    for s, e in sorted(intervals):",
+    "        if out and s <= out[-1][1]:",
+    "            out[-1][1] = max(out[-1][1], e)",
+    "        else:",
+    "            out.append([s, e])",
+    "    return out"
+   ],
+   "tests": "def test_merge():\n    assert merge([[8, 10], [1, 3], [2, 6], [15, 18]]) == [[1, 6], [8, 10], [15, 18]]\n\ndef test_touching_and_contained():\n    assert merge([[1, 4], [4, 5]]) == [[1, 5]]\n    assert merge([[1, 10], [2, 3]]) == [[1, 10]]\n\ndef test_empty():\n    assert merge([]) == []\n",
+   "lesson": "Sort by start first; then each interval either extends the last merged one (take the max end, since it may be contained) or starts a new one."
+  },
+  {
+   "id": "fde-par-topo-sort",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 3,
+   "tags": [
+    "graphs",
+    "dag",
+    "dependencies"
+   ],
+   "pattern": "topological sort",
+   "title": "Topological sort (Kahn's algorithm)",
+   "prompt": "Order the lines so `topo(deps)` returns an order where every task comes after its dependencies; `deps` maps task -> list of tasks it depends on. Raise ValueError on a cycle.",
+   "lines": [
+    "def topo(deps):",
+    "    indeg = {t: len(d) for t, d in deps.items()}",
+    "    ready, order = [t for t, n in indeg.items() if n == 0], []",
+    "    while ready:",
+    "        t = ready.pop(); order.append(t)",
+    "        for u in [u for u, d in deps.items() if t in d]:",
+    "            indeg[u] -= 1",
+    "            if indeg[u] == 0: ready.append(u)",
+    "    if len(order) < len(deps): raise ValueError(\"cycle\")",
+    "    return order"
+   ],
+   "tests": "def _ok(deps, order):\n    pos = {t: i for i, t in enumerate(order)}\n    return set(order) == set(deps) and all(pos[d] < pos[t] for t, ds in deps.items() for d in ds)\n\ndef test_order():\n    deps = {\"deploy\": [\"test\", \"build\"], \"test\": [\"build\"], \"build\": [], \"lint\": []}\n    assert _ok(deps, topo(deps))\n\ndef test_cycle():\n    try:\n        topo({\"a\": [\"b\"], \"b\": [\"a\"]})\n        assert False, \"cycle should raise\"\n    except ValueError:\n        pass\n",
+   "lesson": "Start from tasks with no unmet dependencies; when one finishes, decrement its dependents and release those that hit zero. If some tasks never reach zero, there is a cycle."
+  },
+  {
+   "id": "fde-par-safe-json",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "llm",
+    "json",
+    "validation"
+   ],
+   "pattern": "parse model JSON",
+   "title": "Safe JSON parse of model output",
+   "prompt": "Order the lines so `parse(text, required)` strips a ```json fence, parses, validates that the result is an object with the required keys, and returns None on any failure.",
+   "lines": [
+    "import json",
+    "def parse(text, required=()):",
+    "    t = text.strip().removeprefix(\"```json\").removeprefix(\"```\").removesuffix(\"```\")",
+    "    try:",
+    "        data = json.loads(t)",
+    "    except json.JSONDecodeError:",
+    "        return None  # not JSON at all",
+    "    if not isinstance(data, dict) or any(k not in data for k in required):",
+    "        return None  # wrong shape",
+    "    return data"
+   ],
+   "tests": "def test_fenced():\n    assert parse('```json\\n{\"a\": 1}\\n```', [\"a\"]) == {\"a\": 1}\n\ndef test_invalid():\n    assert parse(\"Sure! {a: 1}\") is None\n\ndef test_missing_key():\n    assert parse('{\"a\": 1}', [\"a\", \"b\"]) is None\n\ndef test_not_object():\n    assert parse(\"[1, 2]\") is None\n",
+   "lesson": "Clean the text before parsing, keep only json.loads inside the try (so you don't hide other bugs), and validate shape after parsing: valid JSON is not the same as the JSON you asked for."
+  },
+  {
+   "id": "fde-par-stream-assembly",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 3,
+   "tags": [
+    "llm",
+    "streaming",
+    "events"
+   ],
+   "pattern": "streaming",
+   "title": "Assemble a streamed response",
+   "prompt": "Order the lines so `assemble(events)` rebuilds the text of each content block from streaming events (`content_block_start`, `content_block_delta`, `message_delta`) and returns `(texts, stop_reason)`.",
+   "lines": [
+    "def assemble(events):",
+    "    blocks, stop = {}, None",
+    "    for ev in events:",
+    "        if ev[\"type\"] == \"content_block_start\":",
+    "            blocks[ev[\"index\"]] = \"\"",
+    "        elif ev[\"type\"] == \"content_block_delta\":",
+    "            blocks[ev[\"index\"]] += ev[\"delta\"][\"text\"]",
+    "        elif ev[\"type\"] == \"message_delta\":",
+    "            stop = ev[\"delta\"][\"stop_reason\"]",
+    "    return [blocks[i] for i in sorted(blocks)], stop"
+   ],
+   "tests": "EVENTS = [\n    {\"type\": \"message_start\"},\n    {\"type\": \"content_block_start\", \"index\": 0},\n    {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"text\": \"Hel\"}},\n    {\"type\": \"content_block_start\", \"index\": 1},\n    {\"type\": \"content_block_delta\", \"index\": 1, \"delta\": {\"text\": \"B\"}},\n    {\"type\": \"content_block_delta\", \"index\": 0, \"delta\": {\"text\": \"lo\"}},\n    {\"type\": \"content_block_stop\", \"index\": 0},\n    {\"type\": \"message_delta\", \"delta\": {\"stop_reason\": \"end_turn\"}},\n    {\"type\": \"message_stop\"},\n]\n\ndef test_assemble():\n    assert assemble(EVENTS) == ([\"Hello\", \"B\"], \"end_turn\")\n\ndef test_empty_stream():\n    assert assemble([]) == ([], None)\n",
+   "lesson": "Key deltas by block index (blocks can interleave), create the block on content_block_start before appending deltas, and read stop_reason from message_delta, which arrives at the end."
+  },
+  {
+   "id": "fde-par-counter-topk",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "collections",
+    "counter",
+    "strings"
+   ],
+   "pattern": "Counter",
+   "title": "Top-k most common words",
+   "prompt": "Order the lines so `top_words(text, k)` returns the k most common lower-cased words as (word, count) pairs.",
+   "lines": [
+    "from collections import Counter",
+    "import re",
+    "def top_words(text, k):",
+    "    words = re.findall(r\"[a-z']+\", text.lower())",
+    "    counts = Counter(words)",
+    "    return counts.most_common(k)"
+   ],
+   "tests": "def test_top():\n    assert top_words(\"the cat and The hat and THE bat\", 2) == [(\"the\", 3), (\"and\", 2)]\n\ndef test_k_larger():\n    assert top_words(\"a a b\", 5) == [(\"a\", 2), (\"b\", 1)]\n\ndef test_empty():\n    assert top_words(\"\", 3) == []\n",
+   "lesson": "Normalise (lower-case, tokenise) before counting, otherwise 'The' and 'the' are different keys. Counter.most_common(k) does the sort for you (ties keep first-seen order)."
+  },
+  {
+   "id": "fde-par-dataclass-factory",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "dataclasses",
+    "defaults"
+   ],
+   "pattern": "dataclass",
+   "title": "Dataclass with default_factory",
+   "prompt": "Order the lines to define a `Conversation` dataclass whose `messages` list is fresh per instance, with an `add(role, text)` method that returns self for chaining.",
+   "lines": [
+    "from dataclasses import dataclass, field",
+    "@dataclass",
+    "class Conversation:",
+    "    model: str = \"claude\"",
+    "    messages: list = field(default_factory=list)",
+    "    def add(self, role, text):",
+    "        self.messages.append({\"role\": role, \"content\": text})",
+    "        return self"
+   ],
+   "tests": "def test_independent_lists():\n    a, b = Conversation(), Conversation()\n    a.add(\"user\", \"hi\")\n    assert b.messages == [], \"each instance needs its own list\"\n\ndef test_chain():\n    c = Conversation(model=\"x\").add(\"user\", \"a\").add(\"assistant\", \"b\")\n    assert [m[\"role\"] for m in c.messages] == [\"user\", \"assistant\"] and c.model == \"x\"\n",
+   "lesson": "@dataclass must sit directly above the class, and mutable defaults need field(default_factory=list); a bare `= []` is rejected because it would be shared by every instance."
+  },
+  {
+   "id": "fde-par-async-gather",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 3,
+   "tags": [
+    "asyncio",
+    "concurrency",
+    "llm"
+   ],
+   "pattern": "async gather",
+   "title": "Bounded concurrent requests",
+   "prompt": "Order the lines so `fetch_all(fetch, items, limit)` runs `fetch` concurrently, never more than `limit` at once, and returns results in input order.",
+   "lines": [
+    "import asyncio",
+    "async def fetch_all(fetch, items, limit):",
+    "    sem = asyncio.Semaphore(limit)",
+    "    async def one(x):",
+    "        async with sem:",
+    "            return await fetch(x)",
+    "    return await asyncio.gather(*(one(x) for x in items))"
+   ],
+   "tests": "import asyncio\n\nasync def test_order_and_limit():\n    live, peak = 0, 0\n    async def fetch(x):\n        nonlocal live, peak\n        live += 1; peak = max(peak, live)\n        await asyncio.sleep(0.001 * (5 - x))\n        live -= 1\n        return x * 10\n    out = await fetch_all(fetch, [1, 2, 3, 4], 2)\n    assert out == [10, 20, 30, 40], \"gather keeps input order\"\n    assert peak <= 2, f\"peak concurrency {peak} > limit\"\n    assert peak == 2, \"should actually run in parallel\"\n",
+   "lesson": "Create the semaphore once, outside the per-item coroutine, so all tasks share it; acquire it around the awaited call; then gather (and await) all coroutines, which preserves input order."
+  },
+  {
+   "id": "fde-par-context-manager",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 2,
+   "tags": [
+    "contextlib",
+    "generators",
+    "observability"
+   ],
+   "pattern": "context manager",
+   "title": "Timing context manager",
+   "prompt": "Order the lines so `timed(name, log, clock)` records `(name, elapsed)` in `log` when the block exits, even if it raised.",
+   "lines": [
+    "from contextlib import contextmanager",
+    "@contextmanager",
+    "def timed(name, log, clock):",
+    "    start = clock()",
+    "    try:",
+    "        yield",
+    "    finally:",
+    "        log.append((name, clock() - start))"
+   ],
+   "tests": "def ticker():\n    t = iter(range(0, 100, 5))\n    return lambda: next(t)\n\ndef test_logs():\n    log = []\n    with timed(\"call\", log, ticker()):\n        pass\n    assert log == [(\"call\", 5)]\n\ndef test_logs_on_error():\n    log = []\n    try:\n        with timed(\"bad\", log, ticker()):\n            raise RuntimeError(\"boom\")\n    except RuntimeError:\n        pass\n    assert log == [(\"bad\", 5)], \"finally must run even when the block raises\"\n",
+   "lesson": "Read the start time before yielding; the `yield` is where the with-block runs, and putting it in try/finally guarantees the exit code runs on exceptions too."
+  },
+  {
+   "id": "fde-par-two-pointer",
+   "type": "parsons",
+   "stage": "coding",
+   "difficulty": 1,
+   "tags": [
+    "arrays",
+    "two-pointer",
+    "sorting"
+   ],
+   "pattern": "two-pointer",
+   "title": "Pair with target sum (two pointers)",
+   "prompt": "Order the lines so `pair_sum(xs, target)` returns a pair of values from the sorted list `xs` that add up to `target`, or None.",
+   "lines": [
+    "def pair_sum(xs, target):",
+    "    i, j = 0, len(xs) - 1",
+    "    while i < j:",
+    "        s = xs[i] + xs[j]",
+    "        if s == target:",
+    "            return xs[i], xs[j]",
+    "        if s < target: i += 1",
+    "        else: j -= 1",
+    "    return None"
+   ],
+   "tests": "def test_found():\n    assert pair_sum([1, 2, 4, 7, 11], 15) == (4, 11)\n\ndef test_missing():\n    assert pair_sum([1, 2, 3], 10) is None\n\ndef test_no_self_pair():\n    assert pair_sum([5], 10) is None\n",
+   "lesson": "Start the pointers at both ends of the sorted list; a sum that is too small can only grow by moving the left pointer right, and a sum too big only shrinks by moving the right one left."
+  }
+ ]
+}

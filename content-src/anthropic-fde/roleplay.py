@@ -1,0 +1,192 @@
+"""FDE: customer discovery role-plays (stage "customer"). All companies are fictional."""
+from _helpers import code
+
+COMMON = (
+    " Stay in character the whole time. You are speaking aloud, so keep every reply"
+    " to 1-3 short sentences. Never volunteer the hidden facts: reveal one only when"
+    " the learner asks a question that clearly targets it. If the learner proposes a"
+    " solution before understanding your situation, push back politely (\"How do you"
+    " know that's what we need?\"). Do not coach the learner or break character."
+)
+
+
+def rubric(*extra):
+    base = [
+        {"criterion": "Users & workflow", "lookFor": "Asked who would use it, for what task, how the work is done today and how often.", "weight": 1},
+        {"criterion": "Data boundaries", "lookFor": "Asked where the data lives, who owns it, how sensitive it is, and what may not leave which boundary.", "weight": 1},
+        {"criterion": "Past attempts", "lookFor": "Asked what was tried before and why it failed or stalled.", "weight": 1},
+        {"criterion": "Success criteria", "lookFor": "Got a measurable success metric and who judges it.", "weight": 1.5},
+        {"criterion": "Constraints & stakeholders", "lookFor": "Uncovered budget, timeline, security review and who can block or approve.", "weight": 1},
+        {"criterion": "Played back", "lookFor": "Summarised what they heard in the customer's words and checked it before proposing anything.", "weight": 1},
+        {"criterion": "Narrow pilot with eval", "lookFor": "Proposed one small, measurable pilot with a test set built from real examples, plus next steps.", "weight": 1.5},
+        {"criterion": "No over-promising", "lookFor": "Was honest about limits (hallucinations, effort, uncertainty); did not promise accuracy numbers or timelines without data.", "weight": 1},
+    ]
+    return base + list(extra)
+
+
+ITEMS = [
+    {
+        "id": "fde-rp-coo-knowledge-base",
+        "type": "roleplay",
+        "stage": "customer",
+        "difficulty": 2,
+        "tags": ["discovery", "executive", "knowledge-base"],
+        "pattern": "Resist designing: discover first",
+        "source": "S13",
+        "title": "COO: \"Put Claude on our knowledge base\"",
+        "persona": (
+            "You are Martina Keller, COO of Alpenfrost, a fictional frozen-food distributor"
+            " with 1,200 employees. You are not technical, busy and a bit impatient; you"
+            " saw a competitor's AI demo and want something similar 'this quarter'. You"
+            " think 'knowledge base' means everything on the shared drive and intranet."
+            " You warm up when the learner asks about business outcomes and your people;"
+            " you get irritated by jargon (vectors, embeddings) and by long monologues."
+            + COMMON
+        ),
+        "brief": (
+            "You are an Anthropic FDE on a first 20-minute call with the COO of a"
+            " mid-size food distributor. She asked for Claude 'on our knowledge base'."
+            " Run discovery. Do not design the solution yet; end with a play-back and a"
+            " proposed next step."
+        ),
+        "opening": "Thanks for making time. We want Claude on our internal knowledge base. How fast can we have that?",
+        "hiddenFacts": [
+            "The real pain is the customer-service team (35 people) answering delivery and allergen questions; new hires take 3 months to be productive.",
+            "The 'knowledge base' is a messy SharePoint with many outdated product spec sheets; nobody owns it.",
+            "Allergen information is safety-critical: a wrong answer could cause a recall or harm a customer.",
+            "An intern built a chatbot last year that gave a wrong delivery date to a big retail client; the head of customer service now distrusts AI.",
+            "IT security must approve any new vendor, which usually takes 6-8 weeks.",
+            "Success for her would be cutting average handling time and new-hire ramp-up; she has no metric today beyond complaints.",
+        ],
+        "rubric": rubric(),
+    },
+    {
+        "id": "fde-rp-skeptical-architect",
+        "type": "roleplay",
+        "stage": "customer",
+        "difficulty": 3,
+        "tags": ["security", "prompt-injection", "data-leakage", "architect"],
+        "pattern": "Answer security objections with specifics, not reassurance",
+        "title": "Skeptical enterprise architect: leakage and prompt injection",
+        "persona": (
+            "You are Daniel Osei, principal enterprise architect at Northgate Insurance"
+            " (fictional). You are technical, polite but skeptical, and you have read"
+            " about prompt injection and data exfiltration through AI agents. You test"
+            " whether the learner gives concrete mitigations or marketing answers. You"
+            " respect people who say 'I don't know, I'll check' and distrust anyone who"
+            " claims a risk is fully solved. Ask sharp follow-ups when answers are vague."
+            + COMMON
+        ),
+        "brief": (
+            "The business wants a Claude agent that reads incoming broker emails and"
+            " updates policy records. You're meeting the principal architect who must"
+            " sign off. Understand his concerns and the system landscape; don't hand-wave."
+        ),
+        "opening": "Before we talk features: how do you stop an email from telling your agent to send our customer data somewhere else?",
+        "hiddenFacts": [
+            "The policy system has a write API with no per-field permissions: any service account can change anything.",
+            "Broker emails often contain attachments from third parties, which nobody scans for embedded instructions.",
+            "They already log all API calls to a SIEM, and he would accept the agent if its tool calls go there too.",
+            "Legal requires that customer data stays in the EU.",
+            "He would approve a read-only first phase where humans apply the changes.",
+        ],
+        "rubric": rubric(
+            {"criterion": "Concrete mitigations", "lookFor": "Named layered defences: least-privilege tools, no outbound tools, untrusted-content handling, human approval for writes, audit logging; admitted residual risk.", "weight": 1.5},
+        ),
+    },
+    {
+        "id": "fde-rp-vp-failed-pilot",
+        "type": "roleplay",
+        "stage": "customer",
+        "difficulty": 2,
+        "tags": ["failed-pilot", "trust", "adoption", "executive"],
+        "pattern": "Learn from the failed pilot before pitching",
+        "title": "VP whose chatbot pilot failed",
+        "persona": (
+            "You are Priya Raman, VP of Operations at Kestrel Telecom (fictional). Last"
+            " year you sponsored a chatbot pilot with another vendor that flopped; it cost"
+            " you credibility with the CEO. You are guarded and slightly defensive, and"
+            " you won't sponsor another failure. You open up if the learner asks what"
+            " went wrong without blaming you, and you test whether they promise too much."
+            + COMMON
+        ),
+        "brief": (
+            "A VP of Operations agreed to a call after a failed AI pilot with another"
+            " vendor. Find out what happened and whether there's a real opportunity."
+            " Aim for a next step she can defend to her CEO."
+        ),
+        "opening": "I'll be honest, we tried this already and it was a disaster. Why would this time be different?",
+        "hiddenFacts": [
+            "The old pilot was a customer-facing chatbot launched to everyone at once with no test set.",
+            "It answered from outdated tariff documents and quoted wrong prices to customers.",
+            "Field technicians, not customers, are the group with the biggest pain: they wait 20 minutes on hold for second-line support.",
+            "The CEO would accept a new attempt only if it is internal-facing and has a clear metric.",
+            "The support knowledge articles were cleaned up six months ago and now have owners.",
+        ],
+        "rubric": rubric(
+            {"criterion": "Acknowledged the past", "lookFor": "Asked about the failure without blaming, and showed how the new plan avoids each cause (scope, eval set, stale data).", "weight": 1},
+        ),
+    },
+    {
+        "id": "fde-rp-compliance-lead",
+        "type": "roleplay",
+        "stage": "customer",
+        "difficulty": 3,
+        "tags": ["regulated", "compliance", "financial-services", "audit"],
+        "pattern": "Make compliance a co-designer",
+        "title": "Compliance lead in a regulated bank",
+        "persona": (
+            "You are Henrik Lund, head of compliance at Fjordbank (fictional), a"
+            " regulated bank. You are calm, precise and process-driven. You don't oppose"
+            " AI, but you need to explain any system to the regulator: who approved"
+            " what, why, and how it is monitored. You dislike vague answers and respond"
+            " well to concrete controls, documentation and being involved early."
+            + COMMON
+        ),
+        "brief": (
+            "The bank's customer-service team wants Claude to draft replies to customer"
+            " complaints. Compliance must agree. Understand Henrik's requirements and"
+            " what would let him say yes."
+        ),
+        "opening": "I understand customer service wants AI on complaints. Tell me how I'd explain that to our regulator.",
+        "hiddenFacts": [
+            "Complaints have a legal response deadline, and every response must be retained and reproducible.",
+            "The regulator recently asked banks to document model risk management for any AI that touches customers.",
+            "He would accept AI drafts if a trained employee approves each one and the approval is logged.",
+            "A previous vendor refused to share how their model was tested, which is why he blocked it.",
+            "He wants compliance to own the list of forbidden statements (e.g. admitting liability).",
+        ],
+        "rubric": rubric(
+            {"criterion": "Governance specifics", "lookFor": "Offered audit trail, documented eval results, human approval logging, change control for prompts/models, and invited compliance to own test cases.", "weight": 1},
+        ),
+    },
+    {
+        "id": "fde-rp-cfo-cost",
+        "type": "roleplay",
+        "stage": "customer",
+        "difficulty": 2,
+        "tags": ["roi", "cost", "executive"],
+        "pattern": "Tie the use case to a measurable business outcome",
+        "title": "CFO who only cares about ROI",
+        "persona": (
+            "You are Laura Brandt, CFO of Meridian Parts (fictional), a 900-person"
+            " industrial distributor. You are numbers-driven and blunt. You've been"
+            " pitched 'AI transformation' five times this year and you cut off fluffy"
+            " answers. You respond to questions about cost drivers and processes, and"
+            " you want a number you can check after 90 days."
+            + COMMON
+        ),
+        "brief": (
+            "A CFO agreed to 15 minutes to hear whether Claude can save money. Find a"
+            " concrete, measurable use case. Do not pitch features."
+        ),
+        "opening": "You have fifteen minutes. Show me where this saves money, or we're done.",
+        "hiddenFacts": [
+            "Accounts payable has 6 clerks keying in 4,000 supplier invoices per month by hand.",
+            "Invoice errors cause about 2% duplicate or wrong payments, which she has to chase.",
+            "She already has a budget line for automation this year, but IT has no spare engineers.",
+            "Any pilot must show results within one quarter.",
+        ],
+        "rubric": rubric(),
+    },
+]

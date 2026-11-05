@@ -1,0 +1,956 @@
+{
+ "version": "1.0.0",
+ "items": [
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-stack-class",
+   "type": "code",
+   "difficulty": 1,
+   "tags": [
+    "class",
+    "dunder"
+   ],
+   "pattern": "small class with invariants",
+   "title": "A Stack class",
+   "prompt": "Write class `Stack` with `push(x)`, `pop()`, `peek()`, `len(s)` support, and make `pop()`/`peek()` on an empty stack raise `IndexError`.",
+   "starter": "class Stack:\n    pass\n",
+   "tests": "def test_lifo():\n    s = Stack()\n    s.push(1); s.push(2)\n    assert s.peek() == 2, \"peek shows the top\"\n    assert s.pop() == 2 and s.pop() == 1, \"LIFO order\"\ndef test_len():\n    s = Stack()\n    s.push(\"a\")\n    assert len(s) == 1, \"implement __len__\"\ndef test_empty_raises():\n    s = Stack()\n    for op in (s.pop, s.peek):\n        try:\n            op()\n        except IndexError:\n            continue\n        assert False, f\"{op.__name__}() on empty stack should raise IndexError\"\ndef test_instances_independent():\n    a, b = Stack(), Stack()\n    a.push(1)\n    assert len(b) == 0, \"each Stack needs its own list (set it in __init__)\"\n",
+   "hints": [
+    "Store items in a list created in __init__ (not as a class attribute).",
+    "len(s) calls s.__len__(); list.pop() on empty already raises IndexError.",
+    "def peek(self): if not self._items: raise IndexError('peek from empty stack'); return self._items[-1]"
+   ],
+   "solution": "class Stack:\n    def __init__(self):\n        self._items = []\n\n    def push(self, x):\n        self._items.append(x)\n\n    def pop(self):\n        return self._items.pop()\n\n    def peek(self):\n        if not self._items:\n            raise IndexError(\"peek from empty stack\")\n        return self._items[-1]\n\n    def __len__(self):\n        return len(self._items)\n",
+   "lesson": "Per-instance state goes in __init__; a class-level `items = []` is shared by every instance. Dunder methods (__len__) plug your class into built-ins.",
+   "ts": "class Stack<T> { private items: T[] = []; get length() { return this.items.length; } }"
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-inventory",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "class",
+    "dict",
+    "exceptions"
+   ],
+   "pattern": "small class with invariants",
+   "title": "Inventory",
+   "prompt": "Write class `Inventory` with `add(item, qty)`, `remove(item, qty)` and `count(item)` (0 if unknown). `remove` raises `ValueError` if there isn't enough stock (and changes nothing); `qty` must be positive or `ValueError`.",
+   "starter": "class Inventory:\n    def __init__(self):\n        pass\n",
+   "tests": "def test_add_count():\n    inv = Inventory()\n    inv.add(\"apple\", 3); inv.add(\"apple\", 2)\n    assert inv.count(\"apple\") == 5\n    assert inv.count(\"pear\") == 0, \"unknown item -> 0\"\ndef test_remove():\n    inv = Inventory()\n    inv.add(\"apple\", 3)\n    inv.remove(\"apple\", 3)\n    assert inv.count(\"apple\") == 0\ndef test_not_enough():\n    inv = Inventory()\n    inv.add(\"apple\", 1)\n    try:\n        inv.remove(\"apple\", 2)\n    except ValueError:\n        assert inv.count(\"apple\") == 1, \"a failed remove must not change stock\"\n        return\n    assert False, \"removing more than you have should raise ValueError\"\ndef test_bad_qty():\n    inv = Inventory()\n    try:\n        inv.add(\"apple\", 0)\n    except ValueError:\n        return\n    assert False, \"qty <= 0 should raise ValueError\"\n",
+   "hints": [
+    "A dict item -> qty is all the state you need.",
+    "Validate first, mutate second — that's how 'changes nothing' stays true.",
+    "if qty <= 0: raise ValueError(...); if self._stock.get(item, 0) < qty: raise ValueError(...)"
+   ],
+   "solution": "class Inventory:\n    def __init__(self):\n        self._stock = {}\n\n    def add(self, item, qty):\n        if qty <= 0:\n            raise ValueError(\"qty must be positive\")\n        self._stock[item] = self._stock.get(item, 0) + qty\n\n    def remove(self, item, qty):\n        if qty <= 0 or self.count(item) < qty:\n            raise ValueError(f\"cannot remove {qty} {item}\")\n        self._stock[item] -= qty\n\n    def count(self, item):\n        return self._stock.get(item, 0)\n",
+   "lesson": "Guard clauses at the top of a method (validate, raise) keep the object's invariants intact: either the whole operation happens or nothing does.",
+   "alternative": "collections.Counter as the store gives count() for free (missing keys → 0), but it happily goes negative, so you still need the guard."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-custom-exception",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "class",
+    "exceptions"
+   ],
+   "pattern": "custom exceptions",
+   "title": "A custom exception with data",
+   "prompt": "Define `InsufficientFunds(Exception)` carrying a `.shortfall` attribute, and class `Account(balance)` whose `withdraw(amount)` raises it when `amount > balance` and otherwise returns the new balance.",
+   "starter": "class InsufficientFunds(Exception):\n    pass\n\nclass Account:\n    def __init__(self, balance):\n        self.balance = balance\n",
+   "tests": "def test_withdraw():\n    a = Account(100)\n    assert a.withdraw(30) == 70 and a.balance == 70\ndef test_raises_with_shortfall():\n    a = Account(10)\n    try:\n        a.withdraw(25)\n    except InsufficientFunds as e:\n        assert e.shortfall == 15, f\"shortfall should be 15, got {e.shortfall}\"\n        assert a.balance == 10, \"balance unchanged on failure\"\n        return\n    assert False, \"should raise InsufficientFunds\"\ndef test_is_exception():\n    assert issubclass(InsufficientFunds, Exception)\ndef test_message():\n    try:\n        Account(0).withdraw(5)\n    except InsufficientFunds as e:\n        assert \"5\" in str(e), \"include the shortfall in the message\"\n",
+   "hints": [
+    "Give the exception an __init__(self, shortfall).",
+    "Call super().__init__(message) so str(e) is useful.",
+    "self.shortfall = shortfall; super().__init__(f'short by {shortfall}')"
+   ],
+   "solution": "class InsufficientFunds(Exception):\n    def __init__(self, shortfall):\n        self.shortfall = shortfall\n        super().__init__(f\"short by {shortfall}\")\n\nclass Account:\n    def __init__(self, balance):\n        self.balance = balance\n\n    def withdraw(self, amount):\n        if amount > self.balance:\n            raise InsufficientFunds(amount - self.balance)\n        self.balance -= amount\n        return self.balance\n",
+   "lesson": "Domain exceptions let callers `except InsufficientFunds` precisely and read structured data off the error instead of parsing a message string.",
+   "ts": "class InsufficientFunds extends Error { constructor(public shortfall: number) { super(`short by ${shortfall}`); } }"
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-ttl-cache",
+   "type": "code",
+   "difficulty": 3,
+   "tags": [
+    "class",
+    "dependency-injection",
+    "time"
+   ],
+   "pattern": "inject the clock",
+   "title": "TTL dict with an injected clock",
+   "prompt": "Write `TTLCache(ttl, clock=time.monotonic)` with `set(key, value)` and `get(key, default=None)`. An entry expires once `ttl` seconds have passed (at exactly `ttl` it's expired). Always read time via `self.clock()`.",
+   "starter": "import time\n\nclass TTLCache:\n    def __init__(self, ttl, clock=time.monotonic):\n        pass\n",
+   "tests": "class FakeClock:\n    def __init__(self): self.now = 0.0\n    def __call__(self): return self.now\n\ndef test_fresh():\n    clk = FakeClock()\n    c = TTLCache(10, clock=clk)\n    c.set(\"a\", 1)\n    clk.now = 9.9\n    assert c.get(\"a\") == 1, \"still fresh at 9.9s\"\ndef test_expired():\n    clk = FakeClock()\n    c = TTLCache(10, clock=clk)\n    c.set(\"a\", 1)\n    clk.now = 10\n    assert c.get(\"a\") is None, \"expired at exactly ttl\"\n    assert c.get(\"a\", \"x\") == \"x\", \"default when expired\"\ndef test_reset_on_set():\n    clk = FakeClock()\n    c = TTLCache(5, clock=clk)\n    c.set(\"a\", 1); clk.now = 4; c.set(\"a\", 2); clk.now = 8\n    assert c.get(\"a\") == 2, \"set() restarts the timer\"\ndef test_missing():\n    assert TTLCache(1, clock=FakeClock()).get(\"nope\", 0) == 0\n",
+   "hints": [
+    "Store (value, expires_at) per key.",
+    "expires_at = self.clock() + self.ttl at set time.",
+    "in get: if key not in data or self.clock() >= expires_at: return default"
+   ],
+   "solution": "import time\n\nclass TTLCache:\n    def __init__(self, ttl, clock=time.monotonic):\n        self.ttl, self.clock, self._data = ttl, clock, {}\n\n    def set(self, key, value):\n        self._data[key] = (value, self.clock() + self.ttl)\n\n    def get(self, key, default=None):\n        if key not in self._data:\n            return default\n        value, expires = self._data[key]\n        if self.clock() >= expires:\n            del self._data[key]\n            return default\n        return value\n",
+   "lesson": "Anything time-dependent takes a `clock` parameter defaulting to the real one. Tests pass a fake and move time instantly — no sleeps, no flakiness. Use time.monotonic for durations, never time.time.",
+   "alternative": "Store the insertion time and compare `now - t >= ttl`; equivalent, but storing expires_at makes per-key TTLs trivial later."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-write-test-slugify",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "testing",
+    "asserts"
+   ],
+   "pattern": "write the test",
+   "title": "Write the test: slugify",
+   "prompt": "A function `slugify(title)` already exists (hidden). It should lowercase, trim surrounding spaces, and join words with single hyphens: `'  Hello   World '` → `'hello-world'`.\n\nWrite `test_slugify()` with plain `assert`s. We'll run it against a correct version and some broken ones — it must pass on the first and fail on every broken one.",
+   "starter": "def test_slugify():\n    pass\n",
+   "tests": "def _good(s):\n    return \"-\".join(s.lower().split())\ndef _no_lower(s):\n    return \"-\".join(s.split())\ndef _no_collapse(s):\n    return s.strip().lower().replace(\" \", \"-\")\ndef _no_trim(s):\n    return s.lower().replace(\" \", \"-\") if s.startswith(\" \") or s.endswith(\" \") else _good(s)\nslugify = _good\n\ndef _run(impl):\n    \"\"\"True if the learner's test passes with impl plugged in.\"\"\"\n    g = globals()\n    assert \"test_slugify\" in g, \"define a function called test_slugify()\"\n    g[\"slugify\"] = impl\n    try:\n        g[\"test_slugify\"]()\n        return True\n    except Exception:\n        return False\n    finally:\n        g[\"slugify\"] = _good\n\ndef test_passes_on_correct_code():\n    assert _run(_good) is True, \"your test fails on a CORRECT implementation\"\ndef test_catches__no_lower():\n    assert _run(_no_lower) is False, 'a version that forgets to lowercase passed your test'\n\ndef test_catches__no_collapse():\n    assert _run(_no_collapse) is False, \"a version that turns '  ' into '--' passed your test\"\n\ndef test_catches__no_trim():\n    assert _run(_no_trim) is False, 'a version that keeps leading/trailing spaces passed your test'\n",
+   "hints": [
+    "One assert per behaviour: lowercase, multiple spaces, leading/trailing spaces.",
+    "Give each assert a message so a failure tells you which behaviour broke.",
+    "assert slugify('Hello World') == 'hello-world', 'lowercases'; assert slugify('a   b') == 'a-b'; assert slugify('  a ') == 'a'"
+   ],
+   "solution": "def test_slugify():\n    assert slugify(\"Hello World\") == \"hello-world\", \"lowercases\"\n    assert slugify(\"a   b\") == \"a-b\", \"collapses runs of spaces\"\n    assert slugify(\"  a b \") == \"a-b\", \"trims the ends\"\n",
+   "lesson": "A good test has one assert per behaviour from the spec, each with a message. Ask 'what bug would slip through?' for every line of the spec.",
+   "alternative": "pytest.mark.parametrize over (input, expected) pairs scales better; with plain Python, loop over a list of cases and include the case in the message."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-write-test-raises",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "testing",
+    "exceptions"
+   ],
+   "pattern": "write the test",
+   "title": "Write the test: it must raise",
+   "prompt": "`parse_price(s)` (hidden) turns `'$4.50'` into `4.5` and must raise `ValueError` for junk like `'abc'` or `''`.\n\nWrite `test_parse_price()` — without pytest, so check the exception with try/except. It must fail against versions that return 0 instead of raising.",
+   "starter": "def test_parse_price():\n    assert parse_price(\"$4.50\") == 4.5\n",
+   "tests": "def _good(s):\n    s = s.strip().removeprefix(\"$\")\n    if not s:\n        raise ValueError(\"empty price\")\n    return float(s)\ndef _zero_on_junk(s):\n    try:\n        return _good(s)\n    except ValueError:\n        return 0.0\ndef _zero_on_empty(s):\n    return 0.0 if not s.strip() else _good(s)\nparse_price = _good\n\ndef _run(impl):\n    \"\"\"True if the learner's test passes with impl plugged in.\"\"\"\n    g = globals()\n    assert \"test_parse_price\" in g, \"define a function called test_parse_price()\"\n    g[\"parse_price\"] = impl\n    try:\n        g[\"test_parse_price\"]()\n        return True\n    except Exception:\n        return False\n    finally:\n        g[\"parse_price\"] = _good\n\ndef test_passes_on_correct_code():\n    assert _run(_good) is True, \"your test fails on a CORRECT implementation\"\ndef test_catches__zero_on_junk():\n    assert _run(_zero_on_junk) is False, \"a version returning 0.0 for 'abc' passed your test\"\n\ndef test_catches__zero_on_empty():\n    assert _run(_zero_on_empty) is False, \"a version returning 0.0 for '' passed your test\"\n",
+   "hints": [
+    "Call it inside try; if it returns normally, that's a failure.",
+    "After the call (still inside try), put `assert False, 'should have raised'`… but careful: AssertionError isn't a ValueError, so it won't be swallowed.",
+    "for bad in ['abc', '']: try: parse_price(bad) except ValueError: continue; raise AssertionError(f'{bad!r} should raise')"
+   ],
+   "solution": "def test_parse_price():\n    assert parse_price(\"$4.50\") == 4.5\n    for bad in [\"abc\", \"\"]:\n        try:\n            parse_price(bad)\n        except ValueError:\n            continue\n        raise AssertionError(f\"{bad!r} should raise ValueError\")\n",
+   "lesson": "Testing for an exception = try the call, `except` the expected type, and fail loudly if no exception happened. Testing only the happy path misses half the spec.",
+   "alternative": "With pytest: `with pytest.raises(ValueError): parse_price('abc')` — say it out loud in an interview even if you write the manual version.",
+   "ts": "expect(() => parsePrice('abc')).toThrow(RangeError)"
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-write-test-chunk",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "testing",
+    "edge-cases"
+   ],
+   "pattern": "write the test",
+   "title": "Write the test: edge cases for chunk",
+   "prompt": "`chunk(xs, n)` (hidden) splits a list into lists of length `n`; the last one may be shorter: `chunk([1,2,3,4,5], 2)` → `[[1,2],[3,4],[5]]`.\n\nWrite `test_chunk()`. Broken versions mishandle the edges — think empty input, an exact multiple, and a remainder.",
+   "starter": "def test_chunk():\n    pass\n",
+   "tests": "def _good(xs, n):\n    return [xs[i:i + n] for i in range(0, len(xs), n)]\ndef _drops_tail(xs, n):\n    return [xs[i:i + n] for i in range(0, len(xs) - n + 1, n)]\ndef _empty_wrong(xs, n):\n    return _good(xs, n) or [[]]\ndef _extra_empty(xs, n):\n    out = _good(xs, n)\n    return out + [[]] if xs and len(xs) % n == 0 else out\nchunk = _good\n\ndef _run(impl):\n    \"\"\"True if the learner's test passes with impl plugged in.\"\"\"\n    g = globals()\n    assert \"test_chunk\" in g, \"define a function called test_chunk()\"\n    g[\"chunk\"] = impl\n    try:\n        g[\"test_chunk\"]()\n        return True\n    except Exception:\n        return False\n    finally:\n        g[\"chunk\"] = _good\n\ndef test_passes_on_correct_code():\n    assert _run(_good) is True, \"your test fails on a CORRECT implementation\"\ndef test_catches__drops_tail():\n    assert _run(_drops_tail) is False, 'a version that drops the short last chunk passed your test'\n\ndef test_catches__empty_wrong():\n    assert _run(_empty_wrong) is False, 'a version returning [[]] for [] passed your test'\n\ndef test_catches__extra_empty():\n    assert _run(_extra_empty) is False, 'a version that appends an empty chunk on exact multiples passed your test'\n",
+   "hints": [
+    "Bugs live at the boundaries. List them before writing asserts.",
+    "Three cases: [] -> [], [1,2,3,4] with n=2 (exact), [1,2,3] with n=2 (remainder).",
+    "assert chunk([], 3) == []; assert chunk([1,2,3,4], 2) == [[1,2],[3,4]]; assert chunk([1,2,3], 2) == [[1,2],[3]]"
+   ],
+   "solution": "def test_chunk():\n    assert chunk([], 3) == [], \"empty input\"\n    assert chunk([1, 2, 3, 4], 2) == [[1, 2], [3, 4]], \"exact multiple\"\n    assert chunk([1, 2, 3], 2) == [[1, 2], [3]], \"remainder kept\"\n",
+   "lesson": "Edge-case checklist: empty, one element, exact fit, remainder, n bigger than the input. Interviewers watch whether you test these unprompted."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-tb-keyerror",
+   "type": "code",
+   "difficulty": 1,
+   "tags": [
+    "traceback",
+    "dict"
+   ],
+   "pattern": "read the traceback",
+   "title": "Traceback: KeyError",
+   "prompt": "Calling `tally([\"a\", \"b\", \"a\"])` crashes:\n\n```\nTraceback (most recent call last):\n  File \"app.py\", line 9, in <module>\n    tally([\"a\", \"b\", \"a\"])\n  File \"app.py\", line 4, in tally\n    counts[w] += 1\nKeyError: 'a'\n```\nFix `tally` so it returns `{\"a\": 2, \"b\": 1}`.\n",
+   "starter": "def tally(words):\n    counts = {}\n    for w in words:\n        counts[w] += 1\n    return counts\n",
+   "tests": "def test_tally():\n    assert tally([\"a\", \"b\", \"a\"]) == {\"a\": 2, \"b\": 1}\ndef test_empty():\n    assert tally([]) == {}\n",
+   "hints": [
+    "Read the last line first: which key is missing, and why?",
+    "The first time you see a word there's nothing to add 1 to.",
+    "counts[w] = counts.get(w, 0) + 1"
+   ],
+   "solution": "def tally(words):\n    counts = {}\n    for w in words:\n        counts[w] = counts.get(w, 0) + 1\n    return counts\n",
+   "lesson": "Read tracebacks bottom-up: exception type + message, then the deepest frame in your code. KeyError on `d[k] += 1` means 'first time seeing k'.",
+   "alternative": "defaultdict(int) or Counter(words) remove the problem entirely."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-tb-typeerror",
+   "type": "code",
+   "difficulty": 1,
+   "tags": [
+    "traceback",
+    "strings"
+   ],
+   "pattern": "read the traceback",
+   "title": "Traceback: TypeError concatenating",
+   "prompt": "```\nTraceback (most recent call last):\n  File \"app.py\", line 2, in label\n    return \"Order #\" + order_id + \" (\" + qty + \" items)\"\nTypeError: can only concatenate str (not \"int\") to str\n```\n`label(42, 3)` should return `'Order #42 (3 items)'`. Fix it.\n",
+   "starter": "def label(order_id, qty):\n    return \"Order #\" + order_id + \" (\" + qty + \" items)\"\n",
+   "tests": "def test_label():\n    assert label(42, 3) == \"Order #42 (3 items)\"\ndef test_str_id():\n    assert label(\"A7\", 1) == \"Order #A7 (1 items)\"\n",
+   "hints": [
+    "Python never converts int to str implicitly (unlike JS).",
+    "An f-string converts each value for you.",
+    "return f\"Order #{order_id} ({qty} items)\""
+   ],
+   "solution": "def label(order_id, qty):\n    return f\"Order #{order_id} ({qty} items)\"\n",
+   "lesson": "`str + int` is a TypeError in Python — no implicit coercion. Use f-strings for any string built from values.",
+   "ts": "In TS `'#' + 42` silently works; Python makes you be explicit."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-tb-none",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "traceback",
+    "regex",
+    "None"
+   ],
+   "pattern": "read the traceback",
+   "title": "Traceback: 'NoneType' has no attribute",
+   "prompt": "```\nTraceback (most recent call last):\n  File \"app.py\", line 5, in version_of\n    return m.group(1)\nAttributeError: 'NoneType' object has no attribute 'group'\n```\n`version_of(\"v1.2.3\")` → `\"1.2.3\"` works, but a string with no version crashes.\nMake it return `None` instead.\n",
+   "starter": "import re\n\ndef version_of(s):\n    m = re.search(r\"v(\\d+\\.\\d+\\.\\d+)\", s)\n    return m.group(1)\n",
+   "tests": "def test_found():\n    assert version_of(\"release v1.2.3 final\") == \"1.2.3\"\ndef test_missing():\n    assert version_of(\"no version here\") is None, \"return None when there's no match\"\n",
+   "hints": [
+    "Which variable is None, and which function returned it?",
+    "re.search returns None when nothing matches.",
+    "return m.group(1) if m else None"
+   ],
+   "solution": "import re\n\ndef version_of(s):\n    m = re.search(r\"v(\\d+\\.\\d+\\.\\d+)\", s)\n    return m.group(1) if m else None\n",
+   "lesson": "\"'NoneType' object has no attribute X\" means something upstream returned None. Find what produced the variable — re.search, dict.get, a function missing a return.",
+   "ts": "Like TS's `m?.[1] ?? null` — Python has no optional chaining, so check explicitly."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-tb-index",
+   "type": "code",
+   "difficulty": 1,
+   "tags": [
+    "traceback",
+    "lists"
+   ],
+   "pattern": "read the traceback",
+   "title": "Traceback: IndexError in a loop",
+   "prompt": "```\nTraceback (most recent call last):\n  File \"app.py\", line 4, in deltas\n    out.append(xs[i + 1] - xs[i])\nIndexError: list index out of range\n```\n`deltas([1, 4, 9])` should be `[3, 5]`. Fix it.\n",
+   "starter": "def deltas(xs):\n    out = []\n    for i in range(len(xs)):\n        out.append(xs[i + 1] - xs[i])\n    return out\n",
+   "tests": "def test_basic():\n    assert deltas([1, 4, 9]) == [3, 5]\ndef test_short():\n    assert deltas([7]) == [] and deltas([]) == []\n",
+   "hints": [
+    "On the last iteration, what is i + 1?",
+    "You need one fewer iteration — or pair neighbours directly.",
+    "return [b - a for a, b in zip(xs, xs[1:])]"
+   ],
+   "solution": "def deltas(xs):\n    return [b - a for a, b in zip(xs, xs[1:])]\n",
+   "lesson": "zip(xs, xs[1:]) pairs neighbours and stops at the shorter list — no index arithmetic, no off-by-one.",
+   "alternative": "range(len(xs) - 1) fixes the loop with minimal change; itertools.pairwise(xs) (3.10+) is the clearest."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-async-basics",
+   "type": "code",
+   "difficulty": 1,
+   "tags": [
+    "async"
+   ],
+   "pattern": "async/await",
+   "title": "Your first async function",
+   "prompt": "`fetch(name)` is an async function (passed in). Write `async def greet_both(fetch)` that awaits `fetch('a')` then `fetch('b')` and returns `'<a> & <b>'`.",
+   "starter": "async def greet_both(fetch):\n    pass\n",
+   "tests": "import asyncio\nasync def fake_fetch(name):\n    await asyncio.sleep(0)\n    return name.upper()\nasync def test_greet():\n    got = await greet_both(fake_fetch)\n    assert got == \"A & B\", f\"got {got!r}\"\n",
+   "hints": [
+    "Calling an async function gives you a coroutine; you need its result.",
+    "Use `await` in front of each call.",
+    "a = await fetch('a'); b = await fetch('b'); return f'{a} & {b}'"
+   ],
+   "solution": "async def greet_both(fetch):\n    a = await fetch(\"a\")\n    b = await fetch(\"b\")\n    return f\"{a} & {b}\"\n",
+   "lesson": "`async def` functions return coroutines; `await` runs one and gives its value. Same mental model as TS Promises, but a coroutine does nothing until awaited.",
+   "ts": "const a = await fetch('a'); — but in JS the request already started when you called fetch()."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-async-gather",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "async",
+    "gather"
+   ],
+   "pattern": "concurrent await (gather)",
+   "title": "Fetch all concurrently",
+   "prompt": "Write `async def fetch_all(urls, fetch)` that runs `fetch(url)` for every url **concurrently** and returns results in the same order as `urls`.",
+   "starter": "async def fetch_all(urls, fetch):\n    return [await fetch(u) for u in urls]\n",
+   "tests": "import asyncio\nlog = []\nasync def fake(u):\n    log.append(\"start \" + u)\n    await asyncio.sleep(0)\n    log.append(\"end \" + u)\n    return u * 2\nasync def test_order():\n    log.clear()\n    assert await fetch_all([\"a\", \"b\"], fake) == [\"aa\", \"bb\"], \"results in input order\"\nasync def test_concurrent():\n    log.clear()\n    await fetch_all([\"a\", \"b\", \"c\"], fake)\n    assert log[:3] == [\"start a\", \"start b\", \"start c\"], \\\n        f\"all fetches should start before any finishes; log was {log}\"\nasync def test_empty():\n    assert await fetch_all([], fake) == []\n",
+   "hints": [
+    "The starter awaits one at a time — each finishes before the next starts.",
+    "asyncio.gather(*coroutines) runs them together and keeps order.",
+    "return list(await asyncio.gather(*(fetch(u) for u in urls)))"
+   ],
+   "solution": "import asyncio\n\nasync def fetch_all(urls, fetch):\n    return list(await asyncio.gather(*(fetch(u) for u in urls)))\n",
+   "lesson": "Sequential `await`s in a loop are serial. asyncio.gather starts them all and returns results in argument order — Python's Promise.all.",
+   "alternative": "asyncio.TaskGroup (3.11+) cancels siblings on the first error; gather with return_exceptions=True collects errors instead of raising.",
+   "ts": "await Promise.all(urls.map(fetch))"
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-async-timeout",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "async",
+    "timeouts"
+   ],
+   "pattern": "timeouts",
+   "title": "Give up after a timeout",
+   "prompt": "Write `async def with_timeout(coro, seconds, default)` that returns the coroutine's result, or `default` if it takes longer than `seconds`.",
+   "starter": "async def with_timeout(coro, seconds, default):\n    return await coro\n",
+   "tests": "import asyncio\nasync def slow():\n    await asyncio.sleep(0.03)\n    return \"slow\"\nasync def fast():\n    return \"fast\"\nasync def test_fast():\n    assert await with_timeout(fast(), 1, \"x\") == \"fast\"\nasync def test_slow():\n    got = await with_timeout(slow(), 0.001, \"fallback\")\n    assert got == \"fallback\", f\"should time out, got {got!r}\"\n",
+   "hints": [
+    "asyncio has a helper that wraps an awaitable with a deadline.",
+    "asyncio.wait_for(coro, timeout) raises asyncio.TimeoutError when time runs out.",
+    "try: return await asyncio.wait_for(coro, seconds) except asyncio.TimeoutError: return default"
+   ],
+   "solution": "import asyncio\n\nasync def with_timeout(coro, seconds, default):\n    try:\n        return await asyncio.wait_for(coro, seconds)\n    except asyncio.TimeoutError:\n        return default\n",
+   "lesson": "Every network call needs a timeout. asyncio.wait_for cancels the inner task and raises TimeoutError (asyncio.TimeoutError is an alias in 3.11+).",
+   "alternative": "`async with asyncio.timeout(seconds):` (3.11+) scopes a deadline over several awaits."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-async-semaphore",
+   "type": "code",
+   "difficulty": 3,
+   "tags": [
+    "async",
+    "semaphore",
+    "rate-limit"
+   ],
+   "pattern": "bounded concurrency",
+   "title": "At most N at a time",
+   "prompt": "`jobs` is a list of zero-argument async functions. Write `async def run_limited(jobs, limit)` that runs them concurrently but never more than `limit` at once, returning results in order.",
+   "starter": "import asyncio\n\nasync def run_limited(jobs, limit):\n    return await asyncio.gather(*(job() for job in jobs))\n",
+   "tests": "import asyncio\nstate = {\"now\": 0, \"peak\": 0}\ndef make(i):\n    async def job():\n        state[\"now\"] += 1\n        state[\"peak\"] = max(state[\"peak\"], state[\"now\"])\n        for _ in range(3):\n            await asyncio.sleep(0)\n        state[\"now\"] -= 1\n        return i\n    return job\nasync def test_limit():\n    state.update(now=0, peak=0)\n    got = await run_limited([make(i) for i in range(6)], 2)\n    assert got == [0, 1, 2, 3, 4, 5], f\"results in order, got {got}\"\n    assert state[\"peak\"] == 2, f\"peak concurrency should be 2, was {state['peak']}\"\n",
+   "hints": [
+    "asyncio.Semaphore(limit) lets only `limit` holders in at once.",
+    "Wrap each job in a helper that does `async with sem:` before awaiting it.",
+    "async def one(job): async with sem: return await job()  — then gather(*(one(j) for j in jobs))"
+   ],
+   "solution": "import asyncio\n\nasync def run_limited(jobs, limit):\n    sem = asyncio.Semaphore(limit)\n\n    async def one(job):\n        async with sem:\n            return await job()\n\n    return list(await asyncio.gather(*(one(j) for j in jobs)))\n",
+   "lesson": "Unbounded gather over 1,000 API calls will hit rate limits. A Semaphore inside a small wrapper caps concurrency while gather still preserves order.",
+   "alternative": "A fixed pool of `limit` worker coroutines pulling from an asyncio.Queue — better for streaming work of unknown length."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-http-status",
+   "type": "code",
+   "difficulty": 1,
+   "tags": [
+    "http",
+    "dependency-injection"
+   ],
+   "pattern": "check the status code",
+   "title": "GET JSON and check the status",
+   "prompt": "`get(url)` (injected) returns a response with `.status` and `.json()`. Write `get_user(get, user_id)` that requests `https://api.example.com/users/<id>` and returns the JSON on 200, `None` on 404, and raises `RuntimeError` otherwise.",
+   "starter": "def get_user(get, user_id):\n    return get(f\"https://api.example.com/users/{user_id}\").json()\n",
+   "tests": "class Resp:\n    def __init__(self, status, body=None):\n        self.status, self._body = status, body\n    def json(self):\n        return self._body\ncalls = []\ndef make_get(status, body=None):\n    def get(url):\n        calls.append(url)\n        return Resp(status, body)\n    return get\ndef test_ok():\n    calls.clear()\n    assert get_user(make_get(200, {\"id\": 7}), 7) == {\"id\": 7}\n    assert calls == [\"https://api.example.com/users/7\"], f\"wrong URL: {calls}\"\ndef test_404():\n    assert get_user(make_get(404), 1) is None, \"404 -> None\"\ndef test_500():\n    try:\n        get_user(make_get(500), 1)\n    except RuntimeError:\n        return\n    assert False, \"500 should raise RuntimeError\"\n",
+   "hints": [
+    "Look at resp.status before touching resp.json().",
+    "Three branches: 200, 404, everything else.",
+    "if resp.status == 404: return None; if resp.status != 200: raise RuntimeError(f'HTTP {resp.status}')"
+   ],
+   "solution": "def get_user(get, user_id):\n    resp = get(f\"https://api.example.com/users/{user_id}\")\n    if resp.status == 404:\n        return None\n    if resp.status != 200:\n        raise RuntimeError(f\"HTTP {resp.status}\")\n    return resp.json()\n",
+   "lesson": "Inject the HTTP function so tests can hand in a fake — no network, instant, deterministic. Always branch on status before parsing the body.",
+   "ts": "const r = await fetch(url); if (r.status === 404) return null; if (!r.ok) throw new Error(...);"
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-http-query",
+   "type": "code",
+   "difficulty": 1,
+   "tags": [
+    "http",
+    "urllib"
+   ],
+   "pattern": "build URLs safely",
+   "title": "Query params with urllib.parse",
+   "prompt": "Write `build_url(base, params)` returning `base?query` with params URL-encoded in order, skipping any whose value is `None`. No params left → just `base`.",
+   "starter": "def build_url(base, params):\n    return base + \"?\" + \"&\".join(f\"{k}={v}\" for k, v in params.items())\n",
+   "tests": "def test_encoding():\n    got = build_url(\"https://x.io/search\", {\"q\": \"a b&c\", \"limit\": 10})\n    assert got == \"https://x.io/search?q=a+b%26c&limit=10\", f\"got {got}\"\ndef test_skip_none():\n    got = build_url(\"https://x.io/s\", {\"q\": \"hi\", \"cursor\": None})\n    assert got == \"https://x.io/s?q=hi\", f\"got {got}\"\ndef test_no_params():\n    assert build_url(\"https://x.io/s\", {\"cursor\": None}) == \"https://x.io/s\"\n",
+   "hints": [
+    "Spaces and & must be escaped, or the server mis-parses the query.",
+    "urllib.parse.urlencode(dict) does the escaping.",
+    "clean = {k: v for k, v in params.items() if v is not None}; return f'{base}?{urlencode(clean)}' if clean else base"
+   ],
+   "solution": "from urllib.parse import urlencode\n\ndef build_url(base, params):\n    clean = {k: v for k, v in params.items() if v is not None}\n    return f\"{base}?{urlencode(clean)}\" if clean else base\n",
+   "lesson": "Never glue query strings by hand: urlencode escapes spaces, &, = and unicode. Filtering None first is the usual 'optional param' idiom.",
+   "ts": "new URLSearchParams(params).toString()"
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-http-retry",
+   "type": "code",
+   "difficulty": 3,
+   "tags": [
+    "http",
+    "retry",
+    "backoff"
+   ],
+   "pattern": "retry with backoff",
+   "title": "Retry 429/5xx with exponential backoff",
+   "prompt": "Write `fetch(get, url, attempts=3, sleep=time.sleep)`. Retry when status is 429 or ≥ 500, sleeping `0.5, 1, 2, …` seconds between tries. Return the response for any other status. Raise `RuntimeError` when attempts run out.",
+   "starter": "import time\n\ndef fetch(get, url, attempts=3, sleep=time.sleep):\n    return get(url)\n",
+   "tests": "class Resp:\n    def __init__(self, status): self.status = status\ndef scripted(*statuses):\n    seq = list(statuses)\n    return lambda url: Resp(seq.pop(0))\ndef test_retries_then_ok():\n    naps = []\n    r = fetch(scripted(503, 429, 200), \"u\", sleep=naps.append)\n    assert r.status == 200\n    assert naps == [0.5, 1.0], f\"backoff should be 0.5 then 1.0, got {naps}\"\ndef test_no_retry_on_4xx():\n    naps = []\n    assert fetch(scripted(404), \"u\", sleep=naps.append).status == 404\n    assert naps == [], \"404 is not retryable\"\ndef test_gives_up():\n    naps = []\n    try:\n        fetch(scripted(500, 500, 500), \"u\", sleep=naps.append)\n    except RuntimeError:\n        assert naps == [0.5, 1.0], f\"no sleep after the last attempt, got {naps}\"\n        return\n    assert False, \"should raise after 3 failed attempts\"\n",
+   "hints": [
+    "Loop `for i in range(attempts)`; decide per response: return, or retry.",
+    "Delay is 0.5 * 2 ** i; skip the sleep after the final attempt.",
+    "if not (r.status == 429 or r.status >= 500): return r; if i < attempts - 1: sleep(0.5 * 2 ** i)"
+   ],
+   "solution": "import time\n\ndef fetch(get, url, attempts=3, sleep=time.sleep):\n    for i in range(attempts):\n        r = get(url)\n        if not (r.status == 429 or r.status >= 500):\n            return r\n        if i < attempts - 1:\n            sleep(0.5 * 2 ** i)\n    raise RuntimeError(f\"gave up after {attempts} attempts: {r.status}\")\n",
+   "lesson": "Retry only what can succeed later (429, 5xx, timeouts) — never 4xx client errors. Exponential backoff + injected sleep makes the policy testable in microseconds.",
+   "alternative": "Add jitter (random.uniform(0, delay)) to avoid thundering herds, and honour a Retry-After header on 429 when present."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-http-timeout",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "http",
+    "timeouts"
+   ],
+   "pattern": "timeouts",
+   "title": "Always pass a timeout",
+   "prompt": "`get(url, timeout)` may raise `TimeoutError`. Write `get_or_none(get, url)`: call it with `timeout=2`, retry once on `TimeoutError`, and return `None` if the second try also times out. Other errors should propagate.",
+   "starter": "def get_or_none(get, url):\n    return get(url)\n",
+   "tests": "def flaky(*outcomes):\n    seq, seen = list(outcomes), []\n    def get(url, timeout=None):\n        seen.append(timeout)\n        o = seq.pop(0)\n        if isinstance(o, Exception):\n            raise o\n        return o\n    get.seen = seen\n    return get\ndef test_ok():\n    g = flaky(\"body\")\n    assert get_or_none(g, \"u\") == \"body\"\n    assert g.seen == [2], \"pass timeout=2\"\ndef test_retry_once():\n    g = flaky(TimeoutError(), \"body\")\n    assert get_or_none(g, \"u\") == \"body\"\ndef test_gives_up():\n    assert get_or_none(flaky(TimeoutError(), TimeoutError()), \"u\") is None\ndef test_other_errors():\n    try:\n        get_or_none(flaky(ValueError(\"bad\")), \"u\")\n    except ValueError:\n        return\n    assert False, \"only TimeoutError should be caught\"\n",
+   "hints": [
+    "Two attempts → a tiny loop.",
+    "Catch only TimeoutError; anything else should bubble up.",
+    "for _ in range(2): try: return get(url, timeout=2) except TimeoutError: pass; return None"
+   ],
+   "solution": "def get_or_none(get, url):\n    for _ in range(2):\n        try:\n            return get(url, timeout=2)\n        except TimeoutError:\n            pass\n    return None\n",
+   "lesson": "Default HTTP clients often wait forever; always set a timeout. Catch the narrowest exception you can handle — a bare `except` would hide real bugs.",
+   "ts": "fetch(url, { signal: AbortSignal.timeout(2000) })"
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-http-paginate",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "http",
+    "pagination",
+    "generators"
+   ],
+   "pattern": "pagination",
+   "title": "Follow the next cursor",
+   "prompt": "Each page from `get(url).json()` looks like `{\"items\": [...], \"next\": url_or_None}`. Write `collect(get, url, max_pages=10)` returning all items across pages, stopping at `next is None` or after `max_pages` pages.",
+   "starter": "def collect(get, url, max_pages=10):\n    return get(url).json()[\"items\"]\n",
+   "tests": "class Resp:\n    def __init__(self, body): self.body = body\n    def json(self): return self.body\nPAGES = {\"p1\": {\"items\": [1, 2], \"next\": \"p2\"},\n         \"p2\": {\"items\": [3], \"next\": \"p3\"},\n         \"p3\": {\"items\": [], \"next\": None}}\ndef test_all():\n    assert collect(lambda u: Resp(PAGES[u]), \"p1\") == [1, 2, 3]\ndef test_cap():\n    loop = lambda u: Resp({\"items\": [u], \"next\": u})\n    assert collect(loop, \"x\", max_pages=3) == [\"x\", \"x\", \"x\"], \"stop after max_pages\"\n",
+   "hints": [
+    "Loop while you have a URL and haven't hit the page cap.",
+    "items.extend(page['items']); url = page['next']",
+    "for _ in range(max_pages): if url is None: break; page = get(url).json(); ..."
+   ],
+   "solution": "def collect(get, url, max_pages=10):\n    items = []\n    for _ in range(max_pages):\n        if url is None:\n            break\n        page = get(url).json()\n        items.extend(page[\"items\"])\n        url = page[\"next\"]\n    return items\n",
+   "lesson": "Cursor pagination: loop on the 'next' pointer. Always cap pages — a buggy API that returns the same cursor would otherwise loop forever.",
+   "alternative": "Make it a generator (`yield from page['items']`) so callers can stop early and memory stays flat."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-json-fences",
+   "type": "code",
+   "difficulty": 1,
+   "tags": [
+    "llm",
+    "json",
+    "strings"
+   ],
+   "pattern": "parse LLM output",
+   "title": "Strip ```json fences",
+   "prompt": "Models often wrap JSON in markdown fences. Write `strip_fences(text)` that removes a leading ```` ``` ```` or ```` ```json ```` line and a trailing ```` ``` ````, plus surrounding whitespace. Unfenced text is returned stripped.",
+   "starter": "def strip_fences(text):\n    return text\n",
+   "tests": "def test_json_fence():\n    assert strip_fences('```json\\n{\"a\": 1}\\n```') == '{\"a\": 1}'\ndef test_plain_fence():\n    assert strip_fences('```\\n[1]\\n```\\n') == \"[1]\"\ndef test_no_fence():\n    assert strip_fences('  {\"a\": 1} ') == '{\"a\": 1}'\ndef test_inner_text_kept():\n    assert strip_fences('```json\\n{\"lang\": \"json\"}\\n```') == '{\"lang\": \"json\"}', \\\n        \"only remove the fence, not the word json elsewhere\"\n",
+   "hints": [
+    "Strip whitespace first, then look at the start and end.",
+    "str.removeprefix / removesuffix remove an exact string once (3.9+).",
+    "t = text.strip(); if t.startswith('```'): t = t.split('\\n', 1)[1] if '\\n' in t else ''; t = t.removesuffix('```')"
+   ],
+   "solution": "def strip_fences(text):\n    t = text.strip()\n    if t.startswith(\"```\"):\n        t = t.split(\"\\n\", 1)[1] if \"\\n\" in t else \"\"\n        t = t.removesuffix(\"```\")\n    return t.strip()\n",
+   "lesson": "Drop the whole first fence line (it may say ```json, ```JSON or ```) rather than a fixed prefix. Never use str.strip('```json') — it strips *characters*, not a prefix.",
+   "alternative": "re.sub(r'^```\\w*\\n|\\n?```$', '', t.strip()) — compact, harder to read."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-json-safe",
+   "type": "code",
+   "difficulty": 1,
+   "tags": [
+    "llm",
+    "json",
+    "exceptions"
+   ],
+   "pattern": "parse LLM output",
+   "title": "json.loads with a fallback",
+   "prompt": "Write `safe_loads(text, default=None)` returning the parsed JSON, or `default` if the text isn't valid JSON. Catch only the JSON error — passing a non-string should still raise.",
+   "starter": "import json\n\ndef safe_loads(text, default=None):\n    return json.loads(text)\n",
+   "tests": "def test_ok():\n    assert safe_loads('{\"a\": [1, 2]}') == {\"a\": [1, 2]}\ndef test_bad():\n    assert safe_loads(\"{'a': 1}\") is None, \"single quotes aren't JSON\"\n    assert safe_loads(\"Sure! Here you go\", {}) == {}, \"default\"\ndef test_narrow_except():\n    try:\n        safe_loads(None)\n    except TypeError:\n        return\n    assert False, \"json.loads(None) raises TypeError — don't swallow it\"\n",
+   "hints": [
+    "json has its own exception class for parse errors.",
+    "json.JSONDecodeError is a subclass of ValueError.",
+    "try: return json.loads(text) except json.JSONDecodeError: return default"
+   ],
+   "solution": "import json\n\ndef safe_loads(text, default=None):\n    try:\n        return json.loads(text)\n    except json.JSONDecodeError:\n        return default\n",
+   "lesson": "LLM output is untrusted input: parse it inside try/except json.JSONDecodeError and decide the fallback explicitly. A bare except hides your own bugs (TypeError).",
+   "ts": "try { return JSON.parse(text) } catch (e) { if (e instanceof SyntaxError) return fallback; throw e }"
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-json-validate",
+   "type": "code",
+   "difficulty": 2,
+   "tags": [
+    "llm",
+    "json",
+    "validation",
+    "isinstance"
+   ],
+   "pattern": "validate external data",
+   "title": "Validate required keys and types",
+   "prompt": "Write `check(obj)` returning a list of error strings (empty = valid). `obj` must be a dict with `name` (str) and `age` (int, **not** bool). Report missing keys as `'missing name'` and wrong types as `'age must be int'`.",
+   "starter": "def check(obj):\n    return []\n",
+   "tests": "def test_valid():\n    assert check({\"name\": \"Ada\", \"age\": 36}) == []\ndef test_missing():\n    assert check({\"age\": 3}) == [\"missing name\"]\ndef test_type():\n    assert check({\"name\": \"Bo\", \"age\": \"3\"}) == [\"age must be int\"]\ndef test_bool_is_not_int():\n    assert check({\"name\": \"Bo\", \"age\": True}) == [\"age must be int\"], \\\n        \"isinstance(True, int) is True — exclude bool explicitly\"\ndef test_not_dict():\n    assert check([1]) == [\"expected an object\"]\n",
+   "hints": [
+    "Check isinstance(obj, dict) first and bail out early.",
+    "Loop over a schema dict like {'name': str, 'age': int}.",
+    "if k not in obj: errs.append(f'missing {k}') elif not isinstance(v, t) or isinstance(v, bool): errs.append(f'{k} must be {t.__name__}')"
+   ],
+   "solution": "SCHEMA = {\"name\": str, \"age\": int}\n\ndef check(obj):\n    if not isinstance(obj, dict):\n        return [\"expected an object\"]\n    errs = []\n    for key, typ in SCHEMA.items():\n        if key not in obj:\n            errs.append(f\"missing {key}\")\n        elif not isinstance(obj[key], typ) or isinstance(obj[key], bool):\n            errs.append(f\"{key} must be {typ.__name__}\")\n    return errs\n",
+   "lesson": "Validate model output against a small schema and return *all* errors — you can feed them back to the model in a retry prompt. Watch out: bool is a subclass of int.",
+   "alternative": "pydantic / jsonschema do this declaratively in production; in an interview, a schema dict + isinstance shows you understand what they do."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-json-extract",
+   "type": "code",
+   "difficulty": 3,
+   "tags": [
+    "llm",
+    "json"
+   ],
+   "pattern": "parse LLM output",
+   "title": "Extract the first JSON object from prose",
+   "prompt": "Write `first_json(text)` returning the first valid JSON object (`{...}`) embedded in chatty text, or `None`. Braces in a broken fragment before it shouldn't stop you.",
+   "starter": "import json\n\ndef first_json(text):\n    return json.loads(text)\n",
+   "tests": "def test_prose():\n    t = 'Sure! Here is the result: {\"ok\": true, \"n\": 2} Let me know.'\n    assert first_json(t) == {\"ok\": True, \"n\": 2}\ndef test_nested():\n    assert first_json('x {\"a\": {\"b\": [1, {\"c\": 2}]}} y') == {\"a\": {\"b\": [1, {\"c\": 2}]}}\ndef test_skip_broken():\n    assert first_json('use {braces} like {\"a\": 1}') == {\"a\": 1}\ndef test_none():\n    assert first_json(\"no json here\") is None\n",
+   "hints": [
+    "Regex can't match nested braces. Let the JSON parser find the end for you.",
+    "json.JSONDecoder().raw_decode(text, i) parses from index i and returns (obj, end).",
+    "for i, ch in enumerate(text): if ch == '{': try: return dec.raw_decode(text, i)[0] except json.JSONDecodeError: continue"
+   ],
+   "solution": "import json\n\ndef first_json(text):\n    dec = json.JSONDecoder()\n    for i, ch in enumerate(text):\n        if ch == \"{\":\n            try:\n                return dec.raw_decode(text, i)[0]\n            except json.JSONDecodeError:\n                continue\n    return None\n",
+   "lesson": "raw_decode parses a JSON value starting at an index and ignores trailing text — the robust way to pull JSON out of prose without fragile regexes.",
+   "alternative": "text[text.find('{'):text.rfind('}')+1] works for one object with no stray braces; better still, ask the API for structured output / tool use."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-predict-json-quotes",
+   "type": "predict",
+   "kind": "output",
+   "difficulty": 1,
+   "tags": [
+    "json",
+    "llm"
+   ],
+   "pattern": "parse LLM output",
+   "code": "import json\ntry:\n    print(json.loads(\"{'a': 1}\")[\"a\"])\nexcept json.JSONDecodeError:\n    print(\"invalid\")\n",
+   "question": "What does this print?",
+   "choices": [
+    "1",
+    "invalid",
+    "KeyError",
+    "{'a': 1}"
+   ],
+   "answer": 1,
+   "explanation": "JSON requires double quotes. Models sometimes emit Python-style dicts — json.loads rejects them with JSONDecodeError."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-predict-finally",
+   "type": "predict",
+   "kind": "output",
+   "difficulty": 2,
+   "tags": [
+    "exceptions"
+   ],
+   "pattern": "try/finally",
+   "code": "def f():\n    try:\n        return \"try\"\n    finally:\n        print(\"finally\", end=\" \")\nprint(f())\n",
+   "question": "What does this print?",
+   "choices": [
+    "try",
+    "try finally",
+    "finally try",
+    "finally"
+   ],
+   "answer": 2,
+   "explanation": "finally runs before the function actually returns, so its print happens first; then the outer print shows the returned 'try'. That's why cleanup goes in finally."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-predict-coroutine",
+   "type": "predict",
+   "kind": "output",
+   "difficulty": 1,
+   "tags": [
+    "async"
+   ],
+   "pattern": "async/await",
+   "code": "async def get():\n    return 42\nx = get()\nprint(type(x).__name__)\nx.close()\n",
+   "question": "What does this print?",
+   "choices": [
+    "42",
+    "int",
+    "coroutine",
+    "None"
+   ],
+   "answer": 2,
+   "explanation": "Calling an async function doesn't run it; it returns a coroutine object. Forgetting `await` is the #1 async bug (Python warns 'coroutine was never awaited')."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-predict-bool-int",
+   "type": "predict",
+   "kind": "output",
+   "difficulty": 2,
+   "tags": [
+    "isinstance",
+    "validation"
+   ],
+   "pattern": "validate external data",
+   "code": "data = {\"count\": True}\nprint(isinstance(data[\"count\"], int))\n",
+   "question": "What does this print?",
+   "choices": [
+    "True",
+    "False",
+    "TypeError"
+   ],
+   "answer": 0,
+   "explanation": "bool is a subclass of int, so a model returning `true` for a count passes an isinstance(int) check. Exclude bool explicitly when validating."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-predict-serial-await",
+   "type": "predict",
+   "kind": "concept",
+   "difficulty": 2,
+   "tags": [
+    "async",
+    "gather"
+   ],
+   "pattern": "concurrent await (gather)",
+   "code": "a = await call_api(\"a\")   # takes ~1 s\nb = await call_api(\"b\")   # takes ~1 s\n",
+   "question": "Roughly how long does this take, and how long with asyncio.gather?",
+   "choices": [
+    "1 s; gather 1 s",
+    "2 s; gather 1 s",
+    "2 s; gather 2 s",
+    "1 s; gather 0.5 s"
+   ],
+   "answer": 1,
+   "explanation": "Each await waits for completion before the next line starts: 2 s. gather(call_api('a'), call_api('b')) overlaps the waits: ~1 s.",
+   "ts": "Same as two sequential awaits vs Promise.all in TS."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-predict-traceback-read",
+   "type": "predict",
+   "kind": "concept",
+   "difficulty": 1,
+   "tags": [
+    "traceback",
+    "debugging"
+   ],
+   "pattern": "read the traceback",
+   "question": "A 40-line traceback goes through requests, urllib3 and your code. Where do you look first?",
+   "choices": [
+    "The first line — it's where the program started",
+    "The last line (exception + message), then the deepest frame in YOUR code",
+    "The frame inside the library — that's where it crashed",
+    "Ignore it and add print statements"
+   ],
+   "answer": 1,
+   "explanation": "Python prints most-recent-call-last. The bottom line says what went wrong; walk up to the last frame in your own files to see what you passed in."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-bug-retry-404",
+   "type": "bug",
+   "difficulty": 2,
+   "tags": [
+    "http",
+    "retry"
+   ],
+   "pattern": "retry with backoff",
+   "title": "Retrying a 404",
+   "code": "def fetch(get, url, attempts=3):\n    for _ in range(attempts):\n        resp = get(url)\n        if resp.status >= 400:\n            continue\n        return resp\n    raise RuntimeError(\"gave up\")\n",
+   "bugLine": 4,
+   "fixed": "def fetch(get, url, attempts=3):\n    for _ in range(attempts):\n        resp = get(url)\n        if resp.status == 429 or resp.status >= 500:\n            continue\n        return resp\n    raise RuntimeError(\"gave up\")\n",
+   "tests": "class Resp:\n    def __init__(self, s): self.status = s\ndef test_404_not_retried():\n    calls = []\n    def get(url):\n        calls.append(url)\n        return Resp(404)\n    assert fetch(get, \"u\").status == 404, \"return the 404 to the caller\"\n    assert len(calls) == 1, f\"404 should not be retried, called {len(calls)}x\"\ndef test_503_retried():\n    seq = [503, 200]\n    assert fetch(lambda u: Resp(seq.pop(0)), \"u\").status == 200\n",
+   "choices": [
+    "Retry only 429 and 5xx",
+    "Increase attempts to 5",
+    "Use `>` instead of `>=`",
+    "Move `return resp` above the if"
+   ],
+   "answer": 0,
+   "explanation": "4xx means the request itself is wrong (not found, bad auth) — repeating it can't help and wastes rate limit. Only 429 and 5xx are transient."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-bug-missing-await",
+   "type": "bug",
+   "difficulty": 1,
+   "tags": [
+    "async"
+   ],
+   "pattern": "async/await",
+   "title": "Adding coroutines",
+   "code": "import asyncio\n\nasync def double(x):\n    await asyncio.sleep(0)\n    return x * 2\n\nasync def total(xs):\n    s = 0\n    for x in xs:\n        s += double(x)\n    return s\n",
+   "bugLine": 10,
+   "fixed": "import asyncio\n\nasync def double(x):\n    await asyncio.sleep(0)\n    return x * 2\n\nasync def total(xs):\n    s = 0\n    for x in xs:\n        s += await double(x)\n    return s\n",
+   "tests": "async def test_total():\n    assert await total([1, 2, 3]) == 12\n",
+   "choices": [
+    "Add `await` before double(x)",
+    "Make total a normal def",
+    "Use asyncio.run(double(x)) inside the loop",
+    "Initialise s = 0.0"
+   ],
+   "answer": 0,
+   "explanation": "double(x) returns a coroutine; `0 + coroutine` is a TypeError. Await it to get the number. (asyncio.run can't be called from inside a running loop.)"
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-bug-mutable-default",
+   "type": "bug",
+   "difficulty": 2,
+   "tags": [
+    "class",
+    "defaults"
+   ],
+   "pattern": "small class with invariants",
+   "title": "Carts that share items",
+   "code": "class Cart:\n    def __init__(self, items=[]):\n        self.items = items\n\n    def add(self, item):\n        self.items.append(item)\n",
+   "bugLine": 2,
+   "fixed": "class Cart:\n    def __init__(self, items=None):\n        self.items = [] if items is None else items\n\n    def add(self, item):\n        self.items.append(item)\n",
+   "tests": "def test_independent():\n    a, b = Cart(), Cart()\n    a.add(\"apple\")\n    assert b.items == [], f\"b should be empty, has {b.items}\"\ndef test_given_items():\n    assert Cart([\"x\"]).items == [\"x\"]\n",
+   "choices": [
+    "Default to None and create a new list inside __init__",
+    "Make items a class attribute",
+    "Use self.items += [item] in add",
+    "Call super().__init__()"
+   ],
+   "answer": 0,
+   "explanation": "Default values are evaluated once, when the def runs — every Cart() shares the same list. Use None as the sentinel and build a fresh list per call."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-parsons-gather",
+   "type": "parsons",
+   "difficulty": 2,
+   "tags": [
+    "async",
+    "gather",
+    "timeouts"
+   ],
+   "pattern": "concurrent await (gather)",
+   "title": "Gather, tolerating timeouts",
+   "prompt": "Arrange the lines so `fetch_all` fetches every url concurrently, using `None` for any that time out.",
+   "lines": [
+    "import asyncio",
+    "async def fetch_all(urls, fetch):",
+    "    async def one(u):",
+    "        try:",
+    "            return await fetch(u)",
+    "        except TimeoutError:",
+    "            return None",
+    "    return await asyncio.gather(*(one(u) for u in urls))"
+   ],
+   "tests": "import asyncio\nasync def fake(u):\n    await asyncio.sleep(0)\n    if u == \"slow\":\n        raise TimeoutError()\n    return u.upper()\nasync def test_mixed():\n    got = await fetch_all([\"a\", \"slow\", \"b\"], fake)\n    assert list(got) == [\"A\", None, \"B\"], f\"got {got}\"\n",
+   "lesson": "Wrap each task in a small inner coroutine that handles its own errors; gather then never blows up because of one bad url."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-parsons-parse",
+   "type": "parsons",
+   "difficulty": 1,
+   "tags": [
+    "json",
+    "llm"
+   ],
+   "pattern": "parse LLM output",
+   "title": "Parse model JSON with a fallback",
+   "prompt": "Arrange the lines so `parse` removes a ```json fence and returns the parsed value, or `default` on invalid JSON.",
+   "lines": [
+    "import json",
+    "def parse(text, default=None):",
+    "    text = text.strip().removeprefix(\"```json\").removesuffix(\"```\")",
+    "    try:",
+    "        return json.loads(text)",
+    "    except json.JSONDecodeError:",
+    "        return default"
+   ],
+   "tests": "def test_fenced():\n    assert parse('```json\\n{\"a\": 1}\\n```') == {\"a\": 1}\ndef test_bad():\n    assert parse(\"nope\", {}) == {}\n",
+   "lesson": "Normalise, then parse inside a narrow try/except — the two-step shape of every LLM-output parser."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-handoff-lru",
+   "type": "code",
+   "difficulty": 3,
+   "tags": [
+    "handoff",
+    "OrderedDict",
+    "class",
+    "cache"
+   ],
+   "pattern": "LRU cache",
+   "title": "Handoff: tiny LRU cache",
+   "prompt": "Write `LRUCache(capacity)` with `get(key)` (returns `-1` if missing) and `put(key, value)`. Both count as a 'use'; when over capacity, evict the least recently used key. O(1) per operation.",
+   "starter": "class LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n",
+   "tests": "def test_evicts_lru():\n    c = LRUCache(2)\n    c.put(\"a\", 1); c.put(\"b\", 2)\n    assert c.get(\"a\") == 1, \"a is now most recent\"\n    c.put(\"c\", 3)\n    assert c.get(\"b\") == -1, \"b was least recently used -> evicted\"\n    assert c.get(\"a\") == 1 and c.get(\"c\") == 3\ndef test_update_counts_as_use():\n    c = LRUCache(2)\n    c.put(\"a\", 1); c.put(\"b\", 2); c.put(\"a\", 10); c.put(\"c\", 3)\n    assert c.get(\"a\") == 10, \"updating a refreshes it\"\n    assert c.get(\"b\") == -1\ndef test_missing():\n    assert LRUCache(1).get(\"x\") == -1\n",
+   "hints": [
+    "collections.OrderedDict remembers order and can move a key to the end in O(1).",
+    "On every use: self.data.move_to_end(key). Oldest is at the front.",
+    "if len(self.data) > self.capacity: self.data.popitem(last=False)"
+   ],
+   "solution": "from collections import OrderedDict\n\nclass LRUCache:\n    def __init__(self, capacity):\n        self.capacity = capacity\n        self.data = OrderedDict()\n\n    def get(self, key):\n        if key not in self.data:\n            return -1\n        self.data.move_to_end(key)\n        return self.data[key]\n\n    def put(self, key, value):\n        self.data[key] = value\n        self.data.move_to_end(key)\n        if len(self.data) > self.capacity:\n            self.data.popitem(last=False)\n",
+   "lesson": "OrderedDict = hash map + doubly linked list: move_to_end and popitem(last=False) are both O(1). Say that out loud — it's the answer to 'how would you build it by hand?'.",
+   "alternative": "A plain dict also keeps insertion order: `self.data[key] = self.data.pop(key)` moves to the end and `next(iter(self.data))` is the oldest. functools.lru_cache for memoising functions.",
+   "ts": "A JS Map keeps insertion order too: map.delete(k); map.set(k, v); map.keys().next().value is oldest."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-handoff-token-bucket",
+   "type": "code",
+   "difficulty": 3,
+   "tags": [
+    "handoff",
+    "rate-limit",
+    "dependency-injection"
+   ],
+   "pattern": "token bucket",
+   "title": "Handoff: token bucket rate limiter",
+   "prompt": "Write `TokenBucket(capacity, rate, clock=time.monotonic)`. It starts full; tokens refill continuously at `rate` per second up to `capacity`. `allow()` consumes one token and returns True, or returns False if fewer than 1 token is available.",
+   "starter": "import time\n\nclass TokenBucket:\n    def __init__(self, capacity, rate, clock=time.monotonic):\n        pass\n\n    def allow(self):\n        return True\n",
+   "tests": "class Clock:\n    def __init__(self): self.t = 100.0\n    def __call__(self): return self.t\ndef test_burst_then_block():\n    clk = Clock()\n    b = TokenBucket(3, 1, clock=clk)\n    assert [b.allow() for _ in range(4)] == [True, True, True, False], \"burst of 3\"\ndef test_refill():\n    clk = Clock()\n    b = TokenBucket(2, 2, clock=clk)\n    b.allow(); b.allow()\n    assert b.allow() is False\n    clk.t += 0.5\n    assert b.allow() is True, \"0.5 s at 2/s refills 1 token\"\n    assert b.allow() is False\ndef test_cap():\n    clk = Clock()\n    b = TokenBucket(2, 10, clock=clk)\n    clk.t += 60\n    assert [b.allow() for _ in range(3)] == [True, True, False], \"never above capacity\"\n",
+   "hints": [
+    "Don't run a timer. Refill lazily inside allow() based on elapsed time.",
+    "tokens = min(capacity, tokens + (now - last) * rate); last = now.",
+    "if self.tokens >= 1: self.tokens -= 1; return True — else return False"
+   ],
+   "solution": "import time\n\nclass TokenBucket:\n    def __init__(self, capacity, rate, clock=time.monotonic):\n        self.capacity, self.rate, self.clock = capacity, rate, clock\n        self.tokens = capacity\n        self.last = clock()\n\n    def allow(self):\n        now = self.clock()\n        self.tokens = min(self.capacity, self.tokens + (now - self.last) * self.rate)\n        self.last = now\n        if self.tokens >= 1:\n            self.tokens -= 1\n            return True\n        return False\n",
+   "lesson": "Lazy refill: compute tokens from elapsed time on each call — no background thread. Injected clock makes bursts and refills testable instantly.",
+   "alternative": "Sliding-window log (deque of timestamps) is exact per window but O(n) memory; a fixed-window counter is simplest but allows 2× bursts at window edges."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-handoff-tool-loop",
+   "type": "code",
+   "difficulty": 3,
+   "tags": [
+    "handoff",
+    "llm",
+    "agents",
+    "tool-use"
+   ],
+   "pattern": "tool-call loop",
+   "title": "Handoff: a minimal tool-call loop",
+   "prompt": "`client.create(messages)` returns either `{\"type\": \"text\", \"text\": ...}` or\n`{\"type\": \"tool_call\", \"name\": ..., \"args\": {...}}`. Write\n`run_agent(client, tools, prompt, max_turns=5)`:\n\n- start with `[{\"role\": \"user\", \"content\": prompt}]`\n- on a tool call, run `tools[name](**args)` and append\n  `{\"role\": \"assistant\", \"content\": reply}` then `{\"role\": \"tool\", \"content\": str(result)}`\n- unknown tool → tool content `\"error: unknown tool <name>\"` (don't crash)\n- return the text reply; raise `RuntimeError` after `max_turns` calls\n",
+   "starter": "def run_agent(client, tools, prompt, max_turns=5):\n    return client.create([{\"role\": \"user\", \"content\": prompt}])[\"text\"]\n",
+   "tests": "class FakeClient:\n    def __init__(self, *replies):\n        self.replies, self.seen = list(replies), []\n    def create(self, messages):\n        self.seen.append([dict(m) for m in messages])\n        return self.replies.pop(0)\ndef add(a, b): return a + b\ndef test_tool_then_text():\n    c = FakeClient({\"type\": \"tool_call\", \"name\": \"add\", \"args\": {\"a\": 2, \"b\": 3}},\n                   {\"type\": \"text\", \"text\": \"It's 5\"})\n    assert run_agent(c, {\"add\": add}, \"2+3?\") == \"It's 5\"\n    last = c.seen[1][-1]\n    assert last == {\"role\": \"tool\", \"content\": \"5\"}, f\"tool result message wrong: {last}\"\n    assert c.seen[1][0] == {\"role\": \"user\", \"content\": \"2+3?\"}\ndef test_unknown_tool():\n    c = FakeClient({\"type\": \"tool_call\", \"name\": \"nope\", \"args\": {}},\n                   {\"type\": \"text\", \"text\": \"ok\"})\n    assert run_agent(c, {}, \"hi\") == \"ok\"\n    assert c.seen[1][-1][\"content\"] == \"error: unknown tool nope\"\ndef test_max_turns():\n    c = FakeClient(*[{\"type\": \"tool_call\", \"name\": \"add\", \"args\": {\"a\": 1, \"b\": 1}}] * 3)\n    try:\n        run_agent(c, {\"add\": add}, \"loop\", max_turns=3)\n    except RuntimeError:\n        assert len(c.seen) == 3, f\"expected 3 model calls, got {len(c.seen)}\"\n        return\n    assert False, \"should raise RuntimeError after max_turns\"\n",
+   "hints": [
+    "It's a `for _ in range(max_turns)` loop around client.create(messages).",
+    "tools.get(name) returns None for unknown tools — branch on that instead of KeyError.",
+    "result = fn(**reply['args']) if fn else f\"error: unknown tool {reply['name']}\"; then append both messages"
+   ],
+   "solution": "def run_agent(client, tools, prompt, max_turns=5):\n    messages = [{\"role\": \"user\", \"content\": prompt}]\n    for _ in range(max_turns):\n        reply = client.create(messages)\n        if reply[\"type\"] == \"text\":\n            return reply[\"text\"]\n        fn = tools.get(reply[\"name\"])\n        result = fn(**reply[\"args\"]) if fn else f\"error: unknown tool {reply['name']}\"\n        messages.append({\"role\": \"assistant\", \"content\": reply})\n        messages.append({\"role\": \"tool\", \"content\": str(result)})\n    raise RuntimeError(f\"no answer after {max_turns} turns\")\n",
+   "lesson": "An agent is a bounded loop: call model → if tool call, execute and append the result → repeat. Always cap turns and turn tool errors into messages the model can recover from. A fake client makes the loop testable offline.",
+   "alternative": "Real APIs (Anthropic Messages) return a list of content blocks with tool_use ids; you append a tool_result block per id. Also wrap tool execution in try/except and send the exception text back."
+  },
+  {
+   "stage": "week4",
+   "week": 4,
+   "id": "cb-w4-handoff-parse-llm",
+   "type": "code",
+   "difficulty": 3,
+   "tags": [
+    "handoff",
+    "llm",
+    "json",
+    "validation"
+   ],
+   "pattern": "parse LLM output",
+   "title": "Handoff: robust LLM JSON parser",
+   "prompt": "Write `parse_llm(text, required)` → dict or `None`. Accept fenced JSON, bare JSON, or JSON buried in prose (first `{...}`). Return `None` unless the result is a dict containing every key in `required`.",
+   "starter": "import json\n\ndef parse_llm(text, required):\n    return json.loads(text)\n",
+   "tests": "REQ = [\"intent\", \"confidence\"]\ndef test_bare():\n    assert parse_llm('{\"intent\": \"refund\", \"confidence\": 0.9}', REQ)[\"intent\"] == \"refund\"\ndef test_fenced():\n    t = '```json\\n{\"intent\": \"x\", \"confidence\": 1}\\n```'\n    assert parse_llm(t, REQ) == {\"intent\": \"x\", \"confidence\": 1}\ndef test_prose():\n    t = 'Here you go: {\"intent\": \"y\", \"confidence\": 0.2}. Anything else?'\n    assert parse_llm(t, REQ)[\"intent\"] == \"y\"\ndef test_missing_key():\n    assert parse_llm('{\"intent\": \"z\"}', REQ) is None, \"confidence missing -> None\"\ndef test_not_object():\n    assert parse_llm(\"[1, 2]\", REQ) is None and parse_llm(\"nope\", REQ) is None\n",
+   "hints": [
+    "You don't need to strip fences if you scan for the first '{' that decodes.",
+    "json.JSONDecoder().raw_decode(text, i) from each '{' position; stop at the first success.",
+    "after decoding: return obj if isinstance(obj, dict) and all(k in obj for k in required) else None"
+   ],
+   "solution": "import json\n\ndef parse_llm(text, required):\n    dec = json.JSONDecoder()\n    for i, ch in enumerate(text):\n        if ch != \"{\":\n            continue\n        try:\n            obj = dec.raw_decode(text, i)[0]\n        except json.JSONDecodeError:\n            continue\n        ok = isinstance(obj, dict) and all(k in obj for k in required)\n        return obj if ok else None\n    return None\n",
+   "lesson": "Layer the defences: locate JSON, decode narrowly, validate shape, return a clear failure value the caller can act on (retry with the errors, or fall back).",
+   "alternative": "Ask the model for tool use / structured output so the API guarantees JSON, and keep this parser as the safety net. On None, re-prompt once with the error."
+  }
+ ]
+}
