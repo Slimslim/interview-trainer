@@ -197,7 +197,7 @@ def research_check(research_files):
         rel = str(path.relative_to(ROOT))
         text = path.read_text()
         defined = {}
-        for m in re.finditer(r"^\|\s*\[?(S\d+)\]?\s*\|(.*)$", text, re.M):
+        for m in re.finditer(r"^\|\s*\[?([A-Z]\d+)\]?\s*\|(.*)$", text, re.M):
             defined[m.group(1)] = m.group(2)
         for sid, row in defined.items():
             if "http" not in row:
@@ -206,12 +206,12 @@ def research_check(research_files):
                 err(rel, f"source {sid} not marked confirmed/reported")
         if not defined:
             err(rel, "no sources table (| S1 | ... | url | date | confirmed/reported |)")
-        in_table = re.compile(r"^\|\s*\[?S\d+")
+        in_table = re.compile(r"^\|\s*\[?[A-Z]\d+")
         for n, line in enumerate(text.splitlines(), 1):
             if in_table.match(line):
                 continue
             if re.search(r"\((confirmed|reported)\b", line, re.I):
-                refs = re.findall(r"S\d+", line)
+                refs = re.findall(r"\[([A-Z]\d+)\]", line)
                 if not refs and "http" not in line:
                     err(f"{rel}:{n}", "claim without source reference")
                 for r_ in refs:

@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "id": "anthropic-applied-ai-architect",
+  "title": "Anthropic · Applied AI Architect, Industries",
+  "subtitle": "Pre-sales architecture: discovery, take-home demo, enterprise design, values",
+  "version": "1.0.0",
+  "kind": "job",
+  "research": "research/anthropic-applied-ai-architect.md",
+  "postingUrl": "https://job-boards.greenhouse.io/anthropic/jobs/4461444008",
+  "stages": [
+    {"id": "screen", "title": "Application & recruiter screen", "source": "S9 S10 S12 S13",
+     "tests": "Written 'Why Anthropic?', motivation, role fit, views on Anthropic research, mission alignment.",
+     "methodology": "90 s pitch: 10+ years customer-facing industrial equipment (CH/CN/US) → solo-built an AI platform in production → wants to bring Claude to industrial customers. Prepare views on 1–2 Anthropic papers.", "mockMinutes": 10},
+    {"id": "technical", "title": "Technical deep dive & take-home", "source": "S10 S12 S13",
+     "tests": "Depth on LLM systems you built; a ~3–4 h take-home building a small Claude app for a fictional customer, then a live demo/presentation.",
+     "methodology": "Presentation: customer problem & success criteria → architecture diagram → prompt & tool design → evals with numbers → failure modes & guardrails → cost/latency (caching, batches, model choice) → next steps. State assumptions.", "mockMinutes": 15},
+    {"id": "customer", "title": "Customer discovery role-play", "source": "S13",
+     "tests": "Discovery, listening, objection handling, not over-promising with a skeptical stakeholder.",
+     "methodology": "Agenda → business context & KPIs → current process & quantified pain → data (sources, sensitivity, residency) → constraints (security, ZDR, procurement, integration) → success criteria & eval ownership → stakeholders & decision process → scoped pilot → written recap.", "mockMinutes": 12},
+    {"id": "design", "title": "Enterprise solution design", "source": "S12 S13 S16",
+     "tests": "Enterprise LLM deployments: secure integration with legacy systems, knowledge retrieval with RBAC, evaluation harnesses, safety and deployment risk.",
+     "methodology": "Requirements → architecture (workflow vs agent, model tiering, RAG with citations, tools/MCP) → evals → guardrails → human checkpoints → security (RBAC, audit, retention) → rollout (pilot → shadow → staged).", "mockMinutes": 15},
+    {"id": "values", "title": "Values & mission", "source": "S9 S12 S14",
+     "tests": "Mission alignment and safety reasoning; several guides call it the round with many rejections.",
+     "methodology": "STAR stories: telling a customer 'no/not yet' for safety or quality, an ambiguous ethical tradeoff, admitting and fixing a mistake — each connected to the RSP and Core Views.", "mockMinutes": 10}
+  ],
+  "files": ["design.json", "roleplay.json", "behavioral.json", "flashcards.json"],
+  "reuse": [
+    {"pack": "anthropic-fde", "types": ["challenge", "bug", "predict", "parsons", "flashcard"], "stageMap": {"coding": "technical", "design": "design", "screen": "screen", "values": "values", "customer": "customer"}},
+    {"pack": "anthropic-fde", "types": ["design", "roleplay", "behavioral"], "stageMap": {"design": "design", "customer": "customer", "values": "values", "screen": "screen"}}
+  ]
+}

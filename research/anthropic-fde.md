@@ -1,6 +1,6 @@
 # Anthropic: Forward Deployed Engineer (FDE / Applied AI): Interview Research
 
-Compiled 2026-11-05. Labels: `(confirmed)` means an official Anthropic source; `(reported)` means a third-party source. `[S#]` refers to the Sources table.
+Compiled 2026-11-05. Labels: `confirmed` means an official Anthropic source; `reported` means a third-party source. `[S#]` refers to the Sources table.
 
 > **Important method caveat:** this session's network blocked direct fetches of job-boards.greenhouse.io and every third-party prep site. anthropic.com pages were read directly. The Greenhouse posting text and all third-party claims come from search-engine result summaries and snippets, not full page reads. Re-check key items yourself before relying on them (see section 7).
 
@@ -46,7 +46,7 @@ Totals: **12 confirmed** (S1–S12; S7–S12 seen only as snippets) and **19 rep
 
 ## 2. Posting text (key responsibilities and qualifications)
 
-Several FDE variants are posted: plain FDE, Applied AI, Custom Agents, Federal Civilian, Staff, and Manager/Head of FDE. Requirements differ by variant. All items below are `(confirmed)` from Greenhouse snippets.
+Several FDE variants are posted: plain FDE, Applied AI, Custom Agents, Federal Civilian, Staff, and Manager/Head of FDE. Requirements differ by variant. All items below are `(confirmed)` from Greenhouse snippets [S7].
 
 **Responsibilities**
 - Embed with strategic customers to drive AI adoption, and provide hands-on, "white glove" deployment support for Anthropic products in customer environments [S7][S10].
@@ -142,7 +142,7 @@ Last updated 2025-07-10. Stage by stage:
 - Context `(reported)`: this replaced an earlier stance of "please do not use AI assistants during the application process," and Fortune covered the reversal on 2025-07-21 [S25].
 - Also `(confirmed)` [S2]: recruiters contact candidates only from @anthropic.com addresses.
 
-## 5. Responsible Scaling Policy and Core Views `(confirmed)`
+## 5. Responsible Scaling Policy and Core Views `(confirmed)` [S4][S5]
 
 **RSP** [S4][S5]
 - **Current version: 3.4, effective 2026-07-08.** The page was updated 2026-08-14. **v3.0 (effective 2026-02-24) was "a comprehensive rewrite."** Later versions: 3.1 (2026-04-02), 3.2 (2026-04-29), 3.3 (2026-05-26), 3.4 (2026-07-08).

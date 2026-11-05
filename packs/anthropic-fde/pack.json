@@ -2,15 +2,27 @@
   "schema": 1,
   "id": "anthropic-fde",
   "title": "Anthropic · Forward Deployed Engineer",
+  "subtitle": "Progressive coding, Claude deployment design, customer discovery, values",
   "version": "1.0.0",
   "kind": "job",
   "research": "research/anthropic-fde.md",
+  "postingUrl": "https://job-boards.greenhouse.io/anthropic/jobs/4985877008",
   "stages": [
-    {"id": "screen", "title": "Recruiter & hiring-manager screen", "tests": "TBD", "methodology": "TBD"},
-    {"id": "coding", "title": "Coding (progressive)", "tests": "TBD", "methodology": "TBD"},
-    {"id": "design", "title": "System / solution design", "tests": "TBD", "methodology": "TBD"},
-    {"id": "customer", "title": "Customer scenario", "tests": "TBD", "methodology": "TBD"},
-    {"id": "values", "title": "Behavioral & values", "tests": "TBD", "methodology": "TBD"}
+    {"id": "screen", "title": "Recruiter & hiring-manager screen", "source": "S13 S15 S16",
+     "tests": "Motivation (why Anthropic, why FDE), which Claude models you've used and what you built, then a hiring-manager deep dive on one project: ownership, tradeoffs, what broke.",
+     "methodology": "60–90 s pitch: customer-facing engineer → built a production Claude platform solo → wants to do that for strategic customers. Deep dive as STAR + architecture: problem → constraints → decisions/tradeoffs → what broke → metrics → what you'd change.", "mockMinutes": 10},
+    {"id": "coding", "title": "Coding (progressive levels)", "source": "S2 S13 S16 S17 S18",
+     "tests": "Practical Python, one problem extended level by level (in-memory DB, bank, LRU cache, rate limiter, crawler). Clean, extensible code under time pressure; syntax lookup allowed, no AI.",
+     "methodology": "Clarify → examples as asserts → plan for extension (small class, dict state) → code the simplest correct version while narrating → test edge cases → refactor before each new level, keep old tests green.", "mockMinutes": 15},
+    {"id": "design", "title": "Claude deployment & system design", "source": "S13 S15 S16",
+     "tests": "Architecting a Claude deployment for an enterprise customer: MCP tool surface and trust boundaries, hosted vs self-hosted, RAG, evals, failure modes.",
+     "methodology": "Requirements → architecture (RAG, orchestration, MCP tools, model choice, batch vs real-time) → data flow & trust boundaries → failure modes (hallucination, prompt injection, rate limits, cost) → evals → human checkpoints → observability/audit → phased rollout.", "mockMinutes": 15},
+    {"id": "customer", "title": "Customer role-play", "source": "S13 S16",
+     "tests": "Live discovery with a non-technical executive or skeptical architect, no editor. Business constraints, data boundaries, past AI failures; resist designing too early.",
+     "methodology": "Agenda → business goal & success metric → current state (workflow, systems, data owners, volume) → constraints (privacy, residency, security review, budget) → history of past attempts → stakeholders & risks → play back → propose a narrow pilot with an eval set → next steps.", "mockMinutes": 12},
+    {"id": "values", "title": "Behavioral & values", "source": "S1 S4 S5 S13 S15",
+     "tests": "Mission alignment, AI-risk reasoning and honesty; reportedly weighted like the technical rounds. Specific, honest views beat 'performing alignment'.",
+     "methodology": "STAR (Situation, Task, Action, Result) + honest reflection. Know the RSP (v3.x) and Core Views well enough to agree and disagree with specifics.", "mockMinutes": 10}
   ],
   "files": ["challenges.json", "bugs.json", "predict.json", "parsons.json", "flashcards.json", "design.json", "roleplay.json", "behavioral.json"]
 }
