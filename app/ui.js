@@ -24,7 +24,7 @@ export function h(tag, attrs, ...children) {
 
 export function mount(...nodes) {
   const app = document.getElementById("app");
-  app.replaceChildren(...nodes);
+  app.replaceChildren(...nodes.flat(Infinity).filter(n => n != null && n !== false));
   window.scrollTo(0, 0);
 }
 

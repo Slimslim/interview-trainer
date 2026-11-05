@@ -66,14 +66,25 @@ export function quickSession() {
     focus = freshness(pool.filter(i => i.stage === weak?.id));
     focusLabel = weak?.title || "";
   }
-  const rest = freshness(pool);
-  let items = fill(minutes, [{ items: dueItems, share: 0.5 }, { items: focus, share: 0.7 }, { items: rest, share: 1 }]);
+  const comeback = s.profile.track === "comeback";
+  const rest = freshness(pool.filter(i => !comeback || i.pack === "comeback"));
+  const extras = comeback ? freshness(pool.filter(i => i.pack !== "comeback")) : [];
+  let items = fill(minutes, [{ items: dueItems, share: 0.5 }, { items: focus, share: 0.75 },
+    { items: extras, share: 0.15 }, { items: rest, share: 1 }]);
   // A 5-minute job-track session still gets one challenge level when coding is the focus.
   if (!items.length) items = rest.slice(0, 3);
-  return { kind: "quick", title: `Quick ${minutes}-min`, items: shuffleMild(items), focusLabel, quick: true };
+  return { kind: "quick", title: `Quick ${minutes}-min`, items: comeback ? codeFirst(items) : shuffleMild(items), focusLabel, quick: true };
 }
 
-// Keep reflex items first so the session starts fast.
+// Comeback: open with a hands-on code rep, interleave the rest.
+function codeFirst(items) {
+  const code = items.filter(i => i.type === "code"), other = items.filter(i => i.type !== "code");
+  const out = [];
+  while (code.length || other.length) { if (code.length) out.push(code.shift()); if (other.length) out.push(other.shift()); }
+  return out;
+}
+
+// Job tracks: keep reflex items first so the session starts fast.
 function shuffleMild(items) {
   const order = { flashcard: 0, predict: 0, code: 1, parsons: 1, bug: 1, behavioral: 2, challenge: 3, design: 3, roleplay: 3 };
   return items.map((it, i) => ({ it, k: order[it.type] + (i % 3) * 0.3 })).sort((a, b) => a.k - b.k).map(x => x.it);

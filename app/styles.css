@@ -136,7 +136,8 @@ pre {
 .codeline { display: flex; min-height: 44px; align-items: stretch; border-bottom: 1px solid var(--border); width: 100%; border-radius: 0; border-width: 0 0 1px; padding: 0; background: transparent; justify-content: flex-start; text-align: left; }
 .codeline:last-child { border-bottom: 0; }
 .codeline .ln { flex: 0 0 34px; color: var(--muted); text-align: right; padding: 11px 8px 0 0; font-size: 12px; }
-.codeline .src { flex: 1; white-space: pre; overflow-x: auto; padding: 11px 8px 11px 0; }
+/* wrap long lines so the whole snippet is readable without sideways scrolling */
+.codeline .src { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; padding: 11px 8px 11px 0; }
 .codeline.wrong { background: var(--bad-bg); }
 .codeline.right { background: var(--good-bg); }
 .codeline input { flex: 1; font: 15px var(--mono); padding: 8px; border: 2px solid var(--accent); border-radius: 8px; margin: 4px 6px 4px 0; background: var(--surface); color: var(--text); min-width: 0; }

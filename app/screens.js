@@ -38,7 +38,7 @@ function trackChips() {
 export function home() {
   const s = S();
   const pv = sessions.quickPreview();
-  const quick = h("button.primary.big.block", { type: "button", id: "quick-start", onclick: () => startSession(sessions.quickSession()) },
+  const quick = h("button.primary.big.block", { type: "button", id: "quick-start", onclick: startQuick },
     `Start · ${s.profile.minutes} min`,
     h("small", pv.due ? `${pv.due} due for review · mixed reps` : "Mixed reps, weighted to your weakest area"));
   const minutes = h("div.chips", { role: "group", "aria-label": "Session length" }, [3, 5, 10].map(m => h("button.chip", {
@@ -94,6 +94,11 @@ export function home() {
 // ------------------------------------------------------------------ session
 let current = null;
 
+export async function startQuick() {
+  await content.loadItems();
+  startSession(sessions.quickSession());
+}
+
 export function startSession(sess) {
   if (!sess.items.length) return toast("Nothing available here yet — finish earlier Comeback weeks or enable Skip gates in Settings.");
   current = { ...sess, idx: 0, results: [], xp: 0, started: Date.now(), requeued: new Set() };
@@ -143,7 +148,7 @@ function renderItem() {
       h("div.progress", { "aria-label": `Item ${c.idx + 1} of ${c.items.length}` }, h("i", { style: { width: `${(100 * c.idx) / c.items.length}%` } })),
       timer.textContent || c.endAt ? timer : h("span.small.muted", `${c.idx + 1}/${c.items.length}`)),
     meta,
-    PLAYERS[item.type](item, ctx),
+    h("section", { "data-item": item.id }, PLAYERS[item.type](item, ctx)),
     h("div.sticky-actions", skip, next));
 }
 
@@ -344,6 +349,13 @@ export function applyTheme() {
 
 export function route() {
   const hash = location.hash || "#home";
+  if (hash.startsWith("#try/")) {   // deep link to one item: #try/<item-id>
+    return content.loadItems().then(() => {
+      const it = content.getItem(decodeURIComponent(hash.slice(5)));
+      history.replaceState(null, "", "#home");
+      it ? startSession({ kind: "drill", title: "Try", items: [it] }) : home();
+    });
+  }
   if (hash === "#session") return current ? renderItem() : (history.replaceState(null, "", "#home"), home());
   current = null;
   stopSpeaking();

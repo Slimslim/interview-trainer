@@ -1,6 +1,7 @@
 // Loads packs/index.json, every pack manifest and its item files.
 // Reuse rules let one pack borrow another pack's items with a stage mapping.
 const packs = {};
+let order = [];
 const byId = {};
 let ready = null;
 
@@ -12,6 +13,7 @@ async function getJSON(url) {
 
 export async function loadManifests() {
   const index = await getJSON("packs/index.json");
+  order = index.packs;
   await Promise.all(index.packs.map(async id => {
     packs[id] = { id, manifest: await getJSON(`packs/${id}/pack.json`), own: [], items: [] };
   }));
@@ -47,7 +49,7 @@ export function loadItems() {
   return ready;
 }
 
-export const allPacks = () => Object.values(packs);
+export const allPacks = () => order.map(id => packs[id]).filter(Boolean);
 export const getPack = id => packs[id];
 export const getItem = id => byId[id];
 export const itemsReady = () => ready;

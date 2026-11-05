@@ -12,9 +12,11 @@ async function boot() {
   store.load();
   applyTheme();
   await content.loadManifests();
-  await content.loadItems();
-  checkGate();
-  route();
+  route();                         // Home renders from the small manifests…
+  content.loadItems().then(() => { // …item files stream in behind it
+    checkGate();
+    if ((location.hash || "#home") === "#home") route();
+  });
   window.addEventListener("hashchange", route);
   window.addEventListener("popstate", () => { if (location.hash === "#session") route(); });
   // Pyodide loads after the first paint so Home is instant.
